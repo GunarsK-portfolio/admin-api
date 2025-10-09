@@ -1,0 +1,202 @@
+basePath: /api/v1
+definitions:
+  models.Profile:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      phone:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.WorkExperience:
+    properties:
+      company:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      display_order:
+        type: integer
+      end_date:
+        type: string
+      id:
+        type: integer
+      is_current:
+        type: boolean
+      position:
+        type: string
+      start_date:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8083
+info:
+  contact: {}
+  description: Admin API for managing portfolio content
+  title: Portfolio Admin API
+  version: "1.0"
+paths:
+  /experience:
+    post:
+      consumes:
+      - application/json
+      description: Create a new work experience entry
+      parameters:
+      - description: Work experience data
+        in: body
+        name: experience
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkExperience'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.WorkExperience'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create work experience
+      tags:
+      - experience
+  /experience/{id}:
+    delete:
+      description: Delete a work experience entry
+      parameters:
+      - description: Work Experience ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete work experience
+      tags:
+      - experience
+    put:
+      consumes:
+      - application/json
+      description: Update an existing work experience entry
+      parameters:
+      - description: Work Experience ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Work experience data
+        in: body
+        name: experience
+        required: true
+        schema:
+          $ref: '#/definitions/models.WorkExperience'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WorkExperience'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update work experience
+      tags:
+      - experience
+  /profile:
+    post:
+      consumes:
+      - application/json
+      description: Update profile information
+      parameters:
+      - description: Profile data
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/models.Profile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update profile
+      tags:
+      - profile
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
