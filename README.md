@@ -107,7 +107,14 @@ All API endpoints (except `/health`) require a valid JWT token:
 
 ```bash
 # 1. Login to get token
+
+# Direct access (standalone)
 curl -X POST http://localhost:8084/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}'
+
+# Via Traefik (infrastructure setup)
+curl -X POST http://localhost:81/auth/v1/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin123"}'
 
@@ -119,7 +126,15 @@ curl -X POST http://localhost:8084/api/v1/auth/login \
 # }
 
 # 2. Use token in requests
+
+# Direct access (standalone)
 curl -X POST http://localhost:8083/api/v1/profile \
+  -H "Authorization: Bearer eyJhbGciOiJI..." \
+  -H "Content-Type: application/json" \
+  -d '{"full_name": "John Doe", ...}'
+
+# Via Traefik (infrastructure setup)
+curl -X POST http://localhost:81/api/v1/profile \
   -H "Authorization: Bearer eyJhbGciOiJI..." \
   -H "Content-Type: application/json" \
   -d '{"full_name": "John Doe", ...}'
@@ -130,7 +145,19 @@ curl -X POST http://localhost:8083/api/v1/profile \
 ### Update Profile
 
 ```bash
+# Direct access (standalone)
 curl -X POST http://localhost:8083/api/v1/profile \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "full_name": "John Doe",
+    "title": "Software Engineer",
+    "bio": "Passionate developer...",
+    "email": "john@example.com"
+  }'
+
+# Via Traefik (infrastructure setup)
+curl -X POST http://localhost:81/api/v1/profile \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -144,7 +171,14 @@ curl -X POST http://localhost:8083/api/v1/profile \
 ### Create Work Experience
 
 ```bash
+# Direct access (standalone)
 curl -X POST http://localhost:8083/api/v1/experience \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+
+# Via Traefik (infrastructure setup)
+curl -X POST http://localhost:81/api/v1/experience \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -160,7 +194,12 @@ curl -X POST http://localhost:8083/api/v1/experience \
 ### Delete Certification
 
 ```bash
+# Direct access (standalone)
 curl -X DELETE http://localhost:8083/api/v1/certifications/1 \
+  -H "Authorization: Bearer <token>"
+
+# Via Traefik (infrastructure setup)
+curl -X DELETE http://localhost:81/api/v1/certifications/1 \
   -H "Authorization: Bearer <token>"
 ```
 
