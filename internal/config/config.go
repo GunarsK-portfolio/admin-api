@@ -19,18 +19,18 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		DBHost:         getEnv("DB_HOST", "localhost"),
-		DBPort:         getEnv("DB_PORT", "5432"),
-		DBUser:         getEnv("DB_USER", "portfolio_user"),
-		DBPassword:     getEnv("DB_PASSWORD", "portfolio_pass"),
-		DBName:         getEnv("DB_NAME", "portfolio"),
-		S3Endpoint:     getEnv("S3_ENDPOINT", "http://localhost:9000"),
-		S3AccessKey:    getEnv("S3_ACCESS_KEY", "minioadmin"),
-		S3SecretKey:    getEnv("S3_SECRET_KEY", "minioadmin"),
-		S3Bucket:       getEnv("S3_BUCKET", "portfolio-images"),
+		DBHost:         getEnvRequired("DB_HOST"),
+		DBPort:         getEnvRequired("DB_PORT"),
+		DBUser:         getEnvRequired("DB_USER"),
+		DBPassword:     getEnvRequired("DB_PASSWORD"),
+		DBName:         getEnvRequired("DB_NAME"),
+		S3Endpoint:     getEnvRequired("S3_ENDPOINT"),
+		S3AccessKey:    getEnvRequired("S3_ACCESS_KEY"),
+		S3SecretKey:    getEnvRequired("S3_SECRET_KEY"),
+		S3Bucket:       getEnvRequired("S3_BUCKET"),
 		S3UseSSL:       getEnv("S3_USE_SSL", "false"),
 		Port:           getEnv("PORT", "8083"),
-		AuthServiceURL: getEnv("AUTH_SERVICE_URL", "http://localhost:8084"),
+		AuthServiceURL: getEnvRequired("AUTH_SERVICE_URL"),
 	}
 }
 
@@ -39,4 +39,12 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func getEnvRequired(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		panic("Required environment variable " + key + " is not set")
+	}
+	return value
 }
