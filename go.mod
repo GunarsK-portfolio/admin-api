@@ -1,8 +1,9 @@
 module github.com/GunarsK-portfolio/admin-api
 
-go 1.25
+go 1.25.2
 
 require (
+	github.com/GunarsK-portfolio/portfolio-common v0.1.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
@@ -64,3 +65,5 @@ require (
 	golang.org/x/tools v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
+
+replace github.com/GunarsK-portfolio/portfolio-common => ../portfolio-common
