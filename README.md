@@ -1,6 +1,8 @@
 # Admin API
 
 ![CI](https://github.com/GunarsK-portfolio/admin-api/workflows/CI/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/GunarsK-portfolio/admin-api)](https://goreportcard.com/report/github.com/GunarsK-portfolio/admin-api)
+[![codecov](https://codecov.io/gh/GunarsK-portfolio/admin-api/branch/main/graph/badge.svg)](https://codecov.io/gh/GunarsK-portfolio/admin-api)
 
 RESTful API for managing portfolio content with authentication.
 
