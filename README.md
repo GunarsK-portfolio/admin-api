@@ -6,17 +6,20 @@ RESTful API for managing portfolio content with authentication.
 
 - Full CRUD operations for portfolio content
 - JWT authentication via auth-service
-- Projects, skills, experience management
-- Image upload/management via MinIO/S3
+- Profile, work experience, and certifications management
+- Skills and skill types management
+- Portfolio projects management
+- Miniature painting projects and themes management
+- Image deletion (deletes file record associations)
 - RESTful API with Swagger documentation
 - Protected endpoints with middleware
 
 ## Tech Stack
 
-- **Language**: Go 1.25
+- **Language**: Go 1.25.2
 - **Framework**: Gin
 - **Database**: PostgreSQL (GORM)
-- **Storage**: MinIO (S3-compatible)
+- **Common**: portfolio-common library (shared database utilities, auth middleware)
 - **Auth**: JWT validation via auth-service
 - **Documentation**: Swagger/OpenAPI
 
@@ -24,7 +27,6 @@ RESTful API for managing portfolio content with authentication.
 
 - Go 1.25+
 - PostgreSQL (or use Docker Compose)
-- MinIO (or use Docker Compose)
 - auth-service running
 
 ## Project Structure
@@ -35,13 +37,13 @@ admin-api/
 │   └── api/              # Application entrypoint
 ├── internal/
 │   ├── config/           # Configuration
-│   ├── database/         # Database connection
 │   ├── handlers/         # HTTP handlers
-│   ├── middleware/       # JWT auth middleware
+│   ├── middleware/       # Custom middleware
 │   ├── models/           # Data models
 │   ├── repository/       # Data access layer
+│   ├── routes/           # Route definitions
 │   ├── service/          # Business logic
-│   └── storage/          # S3/MinIO integration
+│   └── storage/          # Storage utilities
 └── docs/                 # Swagger documentation
 ```
 
@@ -65,21 +67,17 @@ cp .env.example .env
 PORT=8083
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=portfolio_user
-DB_PASSWORD=portfolio_pass
+DB_USER=portfolio_admin
+DB_PASSWORD=portfolio_admin_dev_pass
 DB_NAME=portfolio
-AUTH_SERVICE_URL=http://localhost:8084
-S3_ENDPOINT=http://localhost:9000
-S3_ACCESS_KEY=minioadmin
-S3_SECRET_KEY=minioadmin
-S3_BUCKET=images
-S3_USE_SSL=false
+AUTH_SERVICE_URL=http://localhost:8084/api/v1
+FILES_API_URL=http://localhost:8085/api/v1
 ```
 
 3. Start infrastructure and auth-service (if not running):
 ```bash
 # From infrastructure directory
-docker-compose up -d postgres minio flyway auth-service
+docker-compose up -d postgres flyway auth-service
 ```
 
 4. Run the service:
@@ -97,9 +95,10 @@ task run           # Run the service
 task build         # Build binary
 task test          # Run tests
 task swagger       # Generate Swagger docs
-task clean         # Clean build artifacts
+task clean         # Clean build artifacts and docs
 task docker-build  # Build Docker image
 task docker-run    # Run with docker-compose
+task docker-stop   # Stop admin-api container
 task docker-logs   # View logs
 ```
 
@@ -119,27 +118,76 @@ All endpoints (except health check) require JWT authentication via `Authorizatio
 ### Health Check
 - `GET /health` - Service health status
 
-### Projects
-- `GET /projects` - List all projects
-- `GET /projects/:id` - Get project details
-- `POST /projects` - Create new project
-- `PUT /projects/:id` - Update project
-- `DELETE /projects/:id` - Delete project
+### Portfolio Domain
 
-### Skills
-- `GET /skills` - List all skills
-- `POST /skills` - Create new skill
-- `PUT /skills/:id` - Update skill
-- `DELETE /skills/:id` - Delete skill
+All portfolio endpoints are under `/portfolio` path.
 
-### Experience
-- `GET /experience` - List work experience
-- `POST /experience` - Create experience entry
-- `PUT /experience/:id` - Update experience
-- `DELETE /experience/:id` - Delete experience
+#### Profile
+- `GET /portfolio/profile` - Get profile information
+- `PUT /portfolio/profile` - Update profile
+- `PUT /portfolio/profile/avatar` - Update profile avatar (by file ID)
+- `DELETE /portfolio/profile/avatar` - Remove profile avatar
+- `PUT /portfolio/profile/resume` - Update profile resume (by file ID)
+- `DELETE /portfolio/profile/resume` - Remove profile resume
 
-### Images
-- `POST /images/upload` - Upload image to S3
+#### Work Experience
+- `GET /portfolio/experience` - List all work experience
+- `POST /portfolio/experience` - Create work experience entry
+- `GET /portfolio/experience/:id` - Get work experience by ID
+- `PUT /portfolio/experience/:id` - Update work experience
+- `DELETE /portfolio/experience/:id` - Delete work experience
+
+#### Certifications
+- `GET /portfolio/certifications` - List all certifications
+- `POST /portfolio/certifications` - Create certification
+- `GET /portfolio/certifications/:id` - Get certification by ID
+- `PUT /portfolio/certifications/:id` - Update certification
+- `DELETE /portfolio/certifications/:id` - Delete certification
+
+#### Skills
+- `GET /portfolio/skills` - List all skills
+- `POST /portfolio/skills` - Create new skill
+- `GET /portfolio/skills/:id` - Get skill by ID
+- `PUT /portfolio/skills/:id` - Update skill
+- `DELETE /portfolio/skills/:id` - Delete skill
+
+#### Skill Types
+- `GET /portfolio/skill-types` - List all skill types
+- `POST /portfolio/skill-types` - Create skill type
+- `GET /portfolio/skill-types/:id` - Get skill type by ID
+- `PUT /portfolio/skill-types/:id` - Update skill type
+- `DELETE /portfolio/skill-types/:id` - Delete skill type
+
+#### Portfolio Projects
+- `GET /portfolio/projects` - List all portfolio projects
+- `POST /portfolio/projects` - Create new portfolio project
+- `GET /portfolio/projects/:id` - Get portfolio project by ID
+- `PUT /portfolio/projects/:id` - Update portfolio project
+- `DELETE /portfolio/projects/:id` - Delete portfolio project
+
+### Miniatures Domain
+
+All miniature endpoints are under `/miniatures` path.
+
+#### Miniature Themes
+- `GET /miniatures/themes` - List all miniature themes
+- `POST /miniatures/themes` - Create miniature theme
+- `GET /miniatures/themes/:id` - Get miniature theme by ID
+- `PUT /miniatures/themes/:id` - Update miniature theme
+- `DELETE /miniatures/themes/:id` - Delete miniature theme
+
+#### Miniature Projects
+- `GET /miniatures/projects` - List all miniature projects
+- `POST /miniatures/projects` - Create miniature project
+- `GET /miniatures/projects/:id` - Get miniature project by ID
+- `PUT /miniatures/projects/:id` - Update miniature project
+- `DELETE /miniatures/projects/:id` - Delete miniature project
+
+### Files
+
+Generic file deletion endpoint (works for all file types: avatars, resumes, project images, miniature images).
+
+- `DELETE /files/:id` - Delete file by ID (removes file record and associations)
 
 ### Example: Create Project (with auth)
 
@@ -151,7 +199,7 @@ TOKEN=$(curl -X POST http://localhost:8084/api/v1/auth/login \
   | jq -r '.access_token')
 
 # Create project
-curl -X POST http://localhost:8083/api/v1/projects \
+curl -X POST http://localhost:8083/api/v1/portfolio/projects \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -173,15 +221,11 @@ When running, Swagger UI is available at:
 | `PORT` | Server port | `8083` |
 | `DB_HOST` | PostgreSQL host | `localhost` |
 | `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_USER` | Database user | `portfolio_user` |
-| `DB_PASSWORD` | Database password | `portfolio_pass` |
+| `DB_USER` | Database user | `portfolio_admin` |
+| `DB_PASSWORD` | Database password | `portfolio_admin_dev_pass` |
 | `DB_NAME` | Database name | `portfolio` |
-| `AUTH_SERVICE_URL` | Auth service URL | `http://localhost:8084` |
-| `S3_ENDPOINT` | MinIO/S3 endpoint | `http://localhost:9000` |
-| `S3_ACCESS_KEY` | MinIO access key | `minioadmin` |
-| `S3_SECRET_KEY` | MinIO secret key | `minioadmin` |
-| `S3_BUCKET` | S3 bucket name | `images` |
-| `S3_USE_SSL` | Use SSL for S3 | `false` |
+| `AUTH_SERVICE_URL` | Auth service URL (for JWT validation) | `http://localhost:8084/api/v1` |
+| `FILES_API_URL` | Files API URL (for constructing file URLs) | `http://localhost:8085/api/v1` |
 
 ## Development
 
@@ -211,10 +255,12 @@ go build -o bin/admin-api cmd/api/main.go
 
 ## Authentication
 
-This API validates JWT tokens issued by auth-service. The middleware:
-1. Extracts token from `Authorization` header
-2. Validates token signature and expiry
+This API validates JWT tokens issued by auth-service using the portfolio-common auth middleware. The middleware:
+1. Extracts token from `Authorization: Bearer <token>` header
+2. Validates token with auth-service
 3. Injects user information into request context
+
+All endpoints except `/api/v1/health` require authentication.
 
 ## Integration
 

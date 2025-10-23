@@ -4,7 +4,7 @@ import "github.com/GunarsK-portfolio/admin-api/internal/models"
 
 func (r *repository) GetAllWorkExperience() ([]models.WorkExperience, error) {
 	var experiences []models.WorkExperience
-	err := r.db.Order("display_order ASC").Find(&experiences).Error
+	err := r.db.Order("start_date DESC").Find(&experiences).Error
 	return experiences, err
 }
 

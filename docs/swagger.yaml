@@ -1,50 +1,277 @@
 basePath: /api/v1
 definitions:
+  models.Certification:
+    properties:
+      createdAt:
+        type: string
+      credentialId:
+        type: string
+      credentialUrl:
+        type: string
+      expiryDate:
+        type: string
+      id:
+        type: integer
+      issueDate:
+        type: string
+      issuer:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - issueDate
+    - issuer
+    - name
+    type: object
+  models.Image:
+    properties:
+      caption:
+        type: string
+      id:
+        type: integer
+      url:
+        type: string
+    type: object
+  models.MiniatureProject:
+    properties:
+      completedDate:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      difficulty:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      images:
+        description: Computed for frontend from MiniatureFiles
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
+      manufacturer:
+        type: string
+      name:
+        description: Frontend expects "name"
+        type: string
+      scale:
+        type: string
+      techniques:
+        items:
+          type: string
+        type: array
+      theme:
+        allOf:
+        - $ref: '#/definitions/models.MiniatureTheme'
+        description: Associations (loaded with Preload)
+      themeId:
+        type: integer
+      timeSpent:
+        description: Hours as decimal
+        type: number
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  models.MiniatureTheme:
+    properties:
+      coverImageId:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      miniatures:
+        items:
+          $ref: '#/definitions/models.MiniatureProject'
+        type: array
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  models.PortfolioProject:
+    properties:
+      category:
+        type: string
+      challenges:
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      displayOrder:
+        type: integer
+      endDate:
+        type: string
+      featured:
+        type: boolean
+      features:
+        items:
+          type: string
+        type: array
+      githubUrl:
+        type: string
+      id:
+        type: integer
+      imageFile:
+        allOf:
+        - $ref: '#/definitions/models.StorageFile'
+        description: Associations
+      imageFileId:
+        type: integer
+      isOngoing:
+        type: boolean
+      learnings:
+        items:
+          type: string
+        type: array
+      liveUrl:
+        type: string
+      longDescription:
+        type: string
+      role:
+        type: string
+      startDate:
+        type: string
+      teamSize:
+        type: integer
+      technologies:
+        items:
+          $ref: '#/definitions/models.Skill'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - title
+    type: object
   models.Profile:
     properties:
-      avatar_url:
-        type: string
-      bio:
-        type: string
-      created_at:
+      avatarFileId:
+        type: integer
+      createdAt:
         type: string
       email:
-        type: string
-      full_name:
         type: string
       id:
         type: integer
       location:
         type: string
+      name:
+        type: string
       phone:
+        type: string
+      resumeFileId:
+        type: integer
+      tagline:
+        description: Short bio/tagline
         type: string
       title:
         type: string
-      updated_at:
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  models.Skill:
+    properties:
+      createdAt:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      isVisible:
+        type: boolean
+      skill:
+        type: string
+      skillType:
+        $ref: '#/definitions/models.SkillType'
+      skillTypeId:
+        type: integer
+      updatedAt:
+        type: string
+    required:
+    - skill
+    - skillTypeId
+    type: object
+  models.SkillType:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  models.StorageFile:
+    properties:
+      createdAt:
+        type: string
+      fileName:
+        type: string
+      fileSize:
+        type: integer
+      fileType:
+        type: string
+      id:
+        type: integer
+      mimeType:
+        type: string
+      s3Bucket:
+        type: string
+      s3Key:
+        type: string
+      updatedAt:
         type: string
     type: object
   models.WorkExperience:
     properties:
       company:
         type: string
-      created_at:
+      createdAt:
         type: string
       description:
         type: string
-      display_order:
-        type: integer
-      end_date:
+      endDate:
         type: string
       id:
         type: integer
-      is_current:
+      isCurrent:
         type: boolean
       position:
         type: string
-      start_date:
+      startDate:
         type: string
-      updated_at:
+      updatedAt:
         type: string
+    required:
+    - company
+    - position
+    - startDate
     type: object
 host: localhost:8083
 info:
@@ -53,7 +280,558 @@ info:
   title: Portfolio Admin API
   version: "1.0"
 paths:
-  /experience:
+  /files/{id}:
+    delete:
+      description: |-
+        Delete a miniature file record (removes link between miniature and file)
+        Note: This does not delete the actual file from S3/storage
+      parameters:
+      - description: Miniature File ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete miniature image
+      tags:
+      - Files
+  /miniatures/projects:
+    get:
+      description: Get all miniature painting projects
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MiniatureProject'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all miniature projects
+      tags:
+      - Miniatures - Projects
+    post:
+      consumes:
+      - application/json
+      description: Create a new miniature painting project
+      parameters:
+      - description: Miniature project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.MiniatureProject'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.MiniatureProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create miniature project
+      tags:
+      - Miniatures - Projects
+  /miniatures/projects/{id}:
+    delete:
+      description: |-
+        Delete a miniature project and all associated data (images, techniques, paints)
+        Note: This is a cascade delete - one API call deletes everything
+        Actual image files in S3 are preserved and cleaned up by background job
+      parameters:
+      - description: Miniature Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete miniature project
+      tags:
+      - Miniatures - Projects
+    get:
+      description: Get a single miniature project by ID
+      parameters:
+      - description: Miniature Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MiniatureProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get miniature project by ID
+      tags:
+      - Miniatures - Projects
+    put:
+      consumes:
+      - application/json
+      description: Update an existing miniature project
+      parameters:
+      - description: Miniature Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Miniature project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.MiniatureProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MiniatureProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update miniature project
+      tags:
+      - Miniatures - Projects
+  /miniatures/themes:
+    get:
+      description: Get all miniature painting themes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MiniatureTheme'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all miniature themes
+      tags:
+      - Miniatures - Themes
+    post:
+      consumes:
+      - application/json
+      description: Create a new miniature painting theme
+      parameters:
+      - description: Miniature theme data
+        in: body
+        name: theme
+        required: true
+        schema:
+          $ref: '#/definitions/models.MiniatureTheme'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.MiniatureTheme'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create miniature theme
+      tags:
+      - Miniatures - Themes
+  /miniatures/themes/{id}:
+    delete:
+      description: Delete a miniature theme
+      parameters:
+      - description: Miniature Theme ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete miniature theme
+      tags:
+      - Miniatures - Themes
+    get:
+      description: Get a single miniature theme by ID
+      parameters:
+      - description: Miniature Theme ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MiniatureTheme'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get miniature theme by ID
+      tags:
+      - Miniatures - Themes
+    put:
+      consumes:
+      - application/json
+      description: Update an existing miniature theme
+      parameters:
+      - description: Miniature Theme ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Miniature theme data
+        in: body
+        name: theme
+        required: true
+        schema:
+          $ref: '#/definitions/models.MiniatureTheme'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MiniatureTheme'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update miniature theme
+      tags:
+      - Miniatures - Themes
+  /portfolio/certifications:
+    get:
+      description: Get all certification entries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Certification'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all certifications
+      tags:
+      - Portfolio - Certifications
+    post:
+      consumes:
+      - application/json
+      description: Create a new certification entry
+      parameters:
+      - description: Certification data
+        in: body
+        name: certification
+        required: true
+        schema:
+          $ref: '#/definitions/models.Certification'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Certification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create certification
+      tags:
+      - Portfolio - Certifications
+  /portfolio/certifications/{id}:
+    delete:
+      description: Delete a certification entry
+      parameters:
+      - description: Certification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete certification
+      tags:
+      - Portfolio - Certifications
+    get:
+      description: Get a single certification entry by ID
+      parameters:
+      - description: Certification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Certification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get certification by ID
+      tags:
+      - Portfolio - Certifications
+    put:
+      consumes:
+      - application/json
+      description: Update an existing certification entry
+      parameters:
+      - description: Certification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Certification data
+        in: body
+        name: certification
+        required: true
+        schema:
+          $ref: '#/definitions/models.Certification'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Certification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update certification
+      tags:
+      - Portfolio - Certifications
+  /portfolio/experience:
+    get:
+      description: Get all work experience entries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.WorkExperience'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all work experience
+      tags:
+      - Portfolio - Experience
     post:
       consumes:
       - application/json
@@ -88,8 +866,8 @@ paths:
       - BearerAuth: []
       summary: Create work experience
       tags:
-      - experience
-  /experience/{id}:
+      - Portfolio - Experience
+  /portfolio/experience/{id}:
     delete:
       description: Delete a work experience entry
       parameters:
@@ -117,7 +895,45 @@ paths:
       - BearerAuth: []
       summary: Delete work experience
       tags:
-      - experience
+      - Portfolio - Experience
+    get:
+      description: Get a single work experience entry by ID
+      parameters:
+      - description: Work Experience ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.WorkExperience'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get work experience by ID
+      tags:
+      - Portfolio - Experience
     put:
       consumes:
       - application/json
@@ -157,9 +973,35 @@ paths:
       - BearerAuth: []
       summary: Update work experience
       tags:
-      - experience
-  /profile:
-    post:
+      - Portfolio - Experience
+  /portfolio/profile:
+    get:
+      description: Get profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Profile'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get profile
+      tags:
+      - Portfolio - Profile
+    put:
       consumes:
       - application/json
       description: Update profile information
@@ -193,7 +1035,621 @@ paths:
       - BearerAuth: []
       summary: Update profile
       tags:
-      - profile
+      - Portfolio - Profile
+  /portfolio/profile/avatar:
+    delete:
+      description: Remove profile avatar (sets avatar_file_id to NULL)
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete profile avatar
+      tags:
+      - Portfolio - Profile
+    put:
+      consumes:
+      - application/json
+      description: Update profile avatar by file ID
+      parameters:
+      - description: File ID
+        in: body
+        name: fileId
+        required: true
+        schema:
+          properties:
+            fileId:
+              format: int64
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update profile avatar
+      tags:
+      - Portfolio - Profile
+  /portfolio/profile/resume:
+    delete:
+      description: Remove profile resume (sets resume_file_id to NULL)
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete profile resume
+      tags:
+      - Portfolio - Profile
+    put:
+      consumes:
+      - application/json
+      description: Update profile resume by file ID
+      parameters:
+      - description: File ID
+        in: body
+        name: fileId
+        required: true
+        schema:
+          properties:
+            fileId:
+              format: int64
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update profile resume
+      tags:
+      - Portfolio - Profile
+  /portfolio/projects:
+    get:
+      description: Get all portfolio projects
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PortfolioProject'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all portfolio projects
+      tags:
+      - Portfolio - Projects
+    post:
+      consumes:
+      - application/json
+      description: Create a new portfolio project
+      parameters:
+      - description: Portfolio project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.PortfolioProject'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PortfolioProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create portfolio project
+      tags:
+      - Portfolio - Projects
+  /portfolio/projects/{id}:
+    delete:
+      description: |-
+        Delete a portfolio project and all associated technology links
+        Note: This is a cascade delete - one API call deletes the project and all technology associations
+        The project image file in S3 is preserved and cleaned up by background job
+      parameters:
+      - description: Portfolio Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete portfolio project
+      tags:
+      - Portfolio - Projects
+    get:
+      description: Get a single portfolio project by ID
+      parameters:
+      - description: Portfolio Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PortfolioProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get portfolio project by ID
+      tags:
+      - Portfolio - Projects
+    put:
+      consumes:
+      - application/json
+      description: Update an existing portfolio project
+      parameters:
+      - description: Portfolio Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Portfolio project data
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.PortfolioProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PortfolioProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update portfolio project
+      tags:
+      - Portfolio - Projects
+  /portfolio/skill-types:
+    get:
+      description: Get all skill type categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SkillType'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all skill types
+      tags:
+      - Portfolio - Skills
+    post:
+      consumes:
+      - application/json
+      description: Create a new skill type category
+      parameters:
+      - description: Skill type data
+        in: body
+        name: skillType
+        required: true
+        schema:
+          $ref: '#/definitions/models.SkillType'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SkillType'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create skill type
+      tags:
+      - Portfolio - Skills
+  /portfolio/skill-types/{id}:
+    delete:
+      description: Delete a skill type
+      parameters:
+      - description: Skill Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete skill type
+      tags:
+      - Portfolio - Skills
+    get:
+      description: Get a single skill type by ID
+      parameters:
+      - description: Skill Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SkillType'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get skill type by ID
+      tags:
+      - Portfolio - Skills
+    put:
+      consumes:
+      - application/json
+      description: Update an existing skill type
+      parameters:
+      - description: Skill Type ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Skill type data
+        in: body
+        name: skillType
+        required: true
+        schema:
+          $ref: '#/definitions/models.SkillType'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SkillType'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update skill type
+      tags:
+      - Portfolio - Skills
+  /portfolio/skills:
+    get:
+      description: Get all skills
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Skill'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all skills
+      tags:
+      - Portfolio - Skills
+    post:
+      consumes:
+      - application/json
+      description: Create a new skill
+      parameters:
+      - description: Skill data
+        in: body
+        name: skill
+        required: true
+        schema:
+          $ref: '#/definitions/models.Skill'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Skill'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create skill
+      tags:
+      - Portfolio - Skills
+  /portfolio/skills/{id}:
+    delete:
+      description: Delete a skill
+      parameters:
+      - description: Skill ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete skill
+      tags:
+      - Portfolio - Skills
+    get:
+      description: Get a single skill by ID
+      parameters:
+      - description: Skill ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Skill'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get skill by ID
+      tags:
+      - Portfolio - Skills
+    put:
+      consumes:
+      - application/json
+      description: Update an existing skill
+      parameters:
+      - description: Skill ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Skill data
+        in: body
+        name: skill
+        required: true
+        schema:
+          $ref: '#/definitions/models.Skill'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Skill'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update skill
+      tags:
+      - Portfolio - Skills
 securityDefinitions:
   BearerAuth:
     in: header

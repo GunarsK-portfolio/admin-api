@@ -8,10 +8,57 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetAllWorkExperience godoc
+// @Summary Get all work experience
+// @Description Get all work experience entries
+// @Tags Portfolio - Experience
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.WorkExperience
+// @Failure 401 {object} map[string]string
+// @Router /portfolio/experience [get]
+func (h *Handler) GetAllWorkExperience(c *gin.Context) {
+	experiences, err := h.repo.GetAllWorkExperience()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch work experience"})
+		return
+	}
+
+	c.JSON(http.StatusOK, experiences)
+}
+
+// GetWorkExperienceByID godoc
+// @Summary Get work experience by ID
+// @Description Get a single work experience entry by ID
+// @Tags Portfolio - Experience
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Work Experience ID"
+// @Success 200 {object} models.WorkExperience
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /portfolio/experience/{id} [get]
+func (h *Handler) GetWorkExperienceByID(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	exp, err := h.repo.GetWorkExperienceByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "work experience not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, exp)
+}
+
 // CreateWorkExperience godoc
 // @Summary Create work experience
 // @Description Create a new work experience entry
-// @Tags experience
+// @Tags Portfolio - Experience
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -19,7 +66,7 @@ import (
 // @Success 201 {object} models.WorkExperience
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /experience [post]
+// @Router /portfolio/experience [post]
 func (h *Handler) CreateWorkExperience(c *gin.Context) {
 	var exp models.WorkExperience
 	if err := c.ShouldBindJSON(&exp); err != nil {
@@ -38,7 +85,7 @@ func (h *Handler) CreateWorkExperience(c *gin.Context) {
 // UpdateWorkExperience godoc
 // @Summary Update work experience
 // @Description Update an existing work experience entry
-// @Tags experience
+// @Tags Portfolio - Experience
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -47,7 +94,7 @@ func (h *Handler) CreateWorkExperience(c *gin.Context) {
 // @Success 200 {object} models.WorkExperience
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /experience/{id} [put]
+// @Router /portfolio/experience/{id} [put]
 func (h *Handler) UpdateWorkExperience(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -73,13 +120,13 @@ func (h *Handler) UpdateWorkExperience(c *gin.Context) {
 // DeleteWorkExperience godoc
 // @Summary Delete work experience
 // @Description Delete a work experience entry
-// @Tags experience
+// @Tags Portfolio - Experience
 // @Security BearerAuth
 // @Param id path int true "Work Experience ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /experience/{id} [delete]
+// @Router /portfolio/experience/{id} [delete]
 func (h *Handler) DeleteWorkExperience(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {

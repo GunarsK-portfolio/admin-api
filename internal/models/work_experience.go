@@ -3,18 +3,17 @@ package models
 import "time"
 
 type WorkExperience struct {
-	ID           int64     `json:"id" gorm:"primaryKey"`
-	Company      string    `json:"company"`
-	Position     string    `json:"position"`
-	Description  string    `json:"description"`
-	StartDate    string    `json:"start_date"`
-	EndDate      *string   `json:"end_date"`
-	IsCurrent    bool      `json:"is_current"`
-	DisplayOrder int       `json:"display_order"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID          int64     `json:"id" gorm:"primaryKey"`
+	Company     string    `json:"company" binding:"required"`
+	Position    string    `json:"position" binding:"required"`
+	Description string    `json:"description"`
+	StartDate   string    `json:"startDate" gorm:"column:start_date;type:date" binding:"required"`
+	EndDate     *string   `json:"endDate,omitempty" gorm:"column:end_date;type:date"`
+	IsCurrent   bool      `json:"isCurrent" gorm:"column:is_current;default:false"`
+	CreatedAt   time.Time `json:"createdAt" gorm:"column:created_at"`
+	UpdatedAt   time.Time `json:"updatedAt" gorm:"column:updated_at"`
 }
 
 func (WorkExperience) TableName() string {
-	return "work_experience"
+	return "portfolio.work_experience"
 }

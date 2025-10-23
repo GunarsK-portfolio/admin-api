@@ -2,10 +2,9 @@ package repository
 
 import "github.com/GunarsK-portfolio/admin-api/internal/models"
 
-func (r *repository) CreateImage(image *models.Image) error {
-	return r.db.Create(image).Error
-}
-
+// DeleteImage deletes a miniature file record (junction table entry)
+// NOTE: This deletes the link between a miniature and a file, not the actual file in S3
+// The actual file in storage.files remains (can be cleaned up separately if orphaned)
 func (r *repository) DeleteImage(id int64) error {
-	return r.db.Delete(&models.Image{}, id).Error
+	return r.db.Delete(&models.MiniatureFile{}, id).Error
 }

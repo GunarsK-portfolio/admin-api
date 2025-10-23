@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Initialize repository
-	repo := repository.New(db)
+	repo := repository.New(db, cfg.FilesAPIURL)
 
 	// Initialize handlers
 	handler := handlers.New(repo)

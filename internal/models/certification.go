@@ -4,17 +4,16 @@ import "time"
 
 type Certification struct {
 	ID            int64     `json:"id" gorm:"primaryKey"`
-	Name          string    `json:"name"`
-	Issuer        string    `json:"issuer"`
-	IssueDate     string    `json:"issue_date"`
-	ExpiryDate    *string   `json:"expiry_date"`
-	CredentialID  string    `json:"credential_id"`
-	CredentialURL string    `json:"credential_url"`
-	DisplayOrder  int       `json:"display_order"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	Name          string    `json:"name" binding:"required"`
+	Issuer        string    `json:"issuer" binding:"required"`
+	IssueDate     string    `json:"issueDate" gorm:"column:issue_date;type:date" binding:"required"`
+	ExpiryDate    *string   `json:"expiryDate,omitempty" gorm:"column:expiry_date;type:date"`
+	CredentialID  string    `json:"credentialId,omitempty" gorm:"column:credential_id"`
+	CredentialURL string    `json:"credentialUrl,omitempty" gorm:"column:credential_url"`
+	CreatedAt     time.Time `json:"createdAt" gorm:"column:created_at"`
+	UpdatedAt     time.Time `json:"updatedAt" gorm:"column:updated_at"`
 }
 
 func (Certification) TableName() string {
-	return "certifications"
+	return "portfolio.certifications"
 }

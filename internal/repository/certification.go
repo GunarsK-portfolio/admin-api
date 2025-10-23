@@ -4,7 +4,7 @@ import "github.com/GunarsK-portfolio/admin-api/internal/models"
 
 func (r *repository) GetAllCertifications() ([]models.Certification, error) {
 	var certifications []models.Certification
-	err := r.db.Order("display_order ASC").Find(&certifications).Error
+	err := r.db.Order("issue_date DESC").Find(&certifications).Error
 	return certifications, err
 }
 
