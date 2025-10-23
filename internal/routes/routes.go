@@ -29,6 +29,7 @@ func Setup(router *gin.Engine, handler *handlers.Handler, cfg *config.Config) {
 	authMiddleware := common.NewAuthMiddleware(cfg.AuthServiceURL)
 	v1 := router.Group("/api/v1")
 	v1.Use(authMiddleware.ValidateToken())
+	v1.Use(authMiddleware.AddTTLHeader()) // Add TTL header to all responses
 	{
 		// Portfolio domain
 		portfolio := v1.Group("/portfolio")
