@@ -26,13 +26,13 @@ func (MiniatureFile) TableName() string {
 
 // StorageFile represents files stored in S3/MinIO
 type StorageFile struct {
-	ID       int64     `json:"id" gorm:"primaryKey"`
-	S3Key    string    `json:"s3Key" gorm:"column:s3_key"`
-	S3Bucket string    `json:"s3Bucket" gorm:"column:s3_bucket"`
-	FileName string    `json:"fileName" gorm:"column:file_name"`
-	FileSize int64     `json:"fileSize" gorm:"column:file_size"`
-	MimeType string    `json:"mimeType" gorm:"column:mime_type"`
-	FileType string    `json:"fileType" gorm:"column:file_type"`
+	ID        int64     `json:"id" gorm:"primaryKey"`
+	S3Key     string    `json:"s3Key" gorm:"column:s3_key"`
+	S3Bucket  string    `json:"s3Bucket" gorm:"column:s3_bucket"`
+	FileName  string    `json:"fileName" gorm:"column:file_name"`
+	FileSize  int64     `json:"fileSize" gorm:"column:file_size"`
+	MimeType  string    `json:"mimeType" gorm:"column:mime_type"`
+	FileType  string    `json:"fileType" gorm:"column:file_type"`
 	CreatedAt time.Time `json:"createdAt" gorm:"column:created_at"`
 	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updated_at"`
 }

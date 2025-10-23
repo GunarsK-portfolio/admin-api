@@ -1,5 +1,7 @@
 # Admin API
 
+![CI](https://github.com/GunarsK-portfolio/admin-api/workflows/CI/badge.svg)
+
 RESTful API for managing portfolio content with authentication.
 
 ## Features
@@ -91,15 +93,18 @@ go run cmd/api/main.go
 
 Using Task:
 ```bash
-task run           # Run the service
-task build         # Build binary
-task test          # Run tests
-task swagger       # Generate Swagger docs
-task clean         # Clean build artifacts and docs
-task docker-build  # Build Docker image
-task docker-run    # Run with docker-compose
-task docker-stop   # Stop admin-api container
-task docker-logs   # View logs
+task run            # Run the service
+task build          # Build binary
+task fmt            # Format code
+task test           # Run tests
+task test-coverage  # Run tests with coverage report
+task lint           # Run golangci-lint
+task vuln           # Check for vulnerabilities
+task ci             # Run all CI checks locally
+task swagger        # Generate Swagger docs
+task clean          # Clean build artifacts
+task docker-build   # Build Docker image
+task install-tools  # Install dev tools (golangci-lint, govulncheck, etc.)
 ```
 
 Using Go directly:
@@ -189,26 +194,6 @@ Generic file deletion endpoint (works for all file types: avatars, resumes, proj
 
 - `DELETE /files/:id` - Delete file by ID (removes file record and associations)
 
-### Example: Create Project (with auth)
-
-```bash
-# First, get token from auth-service
-TOKEN=$(curl -X POST http://localhost:8084/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","password":"password"}' \
-  | jq -r '.access_token')
-
-# Create project
-curl -X POST http://localhost:8083/api/v1/portfolio/projects \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "My Project",
-    "description": "Project description",
-    "technologies": ["Go", "Vue.js"]
-  }'
-```
-
 ## Swagger Documentation
 
 When running, Swagger UI is available at:
@@ -227,32 +212,6 @@ When running, Swagger UI is available at:
 | `AUTH_SERVICE_URL` | Auth service URL (for JWT validation) | `http://localhost:8084/api/v1` |
 | `FILES_API_URL` | Files API URL (for constructing file URLs) | `http://localhost:8085/api/v1` |
 
-## Development
-
-### Running Tests
-
-```bash
-task test
-# or
-go test ./...
-```
-
-### Generating Swagger Docs
-
-```bash
-task swagger
-# or
-swag init -g cmd/api/main.go -o docs
-```
-
-### Building
-
-```bash
-task build
-# or
-go build -o bin/admin-api cmd/api/main.go
-```
-
 ## Authentication
 
 This API validates JWT tokens issued by auth-service using the portfolio-common auth middleware. The middleware:
@@ -260,7 +219,7 @@ This API validates JWT tokens issued by auth-service using the portfolio-common 
 2. Validates token with auth-service
 3. Injects user information into request context
 
-All endpoints except `/api/v1/health` require authentication.
+All endpoints except `/health` require authentication.
 
 ## Integration
 
