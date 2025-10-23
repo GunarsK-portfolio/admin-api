@@ -34,7 +34,7 @@ type MiniatureProject struct {
 	// Associations (loaded with Preload)
 	Theme          *MiniatureTheme `json:"theme,omitempty" gorm:"foreignKey:ThemeID"`
 	MiniatureFiles []MiniatureFile `json:"-" gorm:"foreignKey:MiniatureProjectID"` // Database relation
-	Images         []Image         `json:"images,omitempty" gorm:"-"`               // Computed for frontend from MiniatureFiles
+	Images         []Image         `json:"images,omitempty" gorm:"-"`              // Computed for frontend from MiniatureFiles
 	Techniques     []string        `json:"techniques,omitempty" gorm:"-"`
 }
 
