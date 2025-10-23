@@ -9,20 +9,26 @@ func (r *repository) GetProfile() (*models.Profile, error) {
 }
 
 func (r *repository) UpdateProfile(profile *models.Profile) error {
-	// Update the first profile record (singleton pattern)
-	// This prevents creating duplicate profiles
-	return r.db.Model(&models.Profile{}).
-		Where("id = (SELECT MIN(id) FROM portfolio.profile)").
-		Updates(map[string]interface{}{
-			"full_name":      profile.FullName,
-			"title":          profile.Title,
-			"bio":            profile.Bio,
-			"email":          profile.Email,
-			"phone":          profile.Phone,
-			"location":       profile.Location,
-			"avatar_file_id": profile.AvatarFileID,
-			"resume_file_id": profile.ResumeFileID,
-		}).Error
+	// Upsert: update if exists, insert if doesn't (singleton pattern)
+	var existing models.Profile
+	err := r.db.First(&existing).Error
+
+	if err != nil {
+		// No profile exists, create the first one
+		return r.db.Create(profile).Error
+	}
+
+	// Profile exists, update it
+	return r.db.Model(&existing).Updates(map[string]interface{}{
+		"full_name":      profile.FullName,
+		"title":          profile.Title,
+		"bio":            profile.Bio,
+		"email":          profile.Email,
+		"phone":          profile.Phone,
+		"location":       profile.Location,
+		"avatar_file_id": profile.AvatarFileID,
+		"resume_file_id": profile.ResumeFileID,
+	}).Error
 }
 
 func (r *repository) UpdateProfileAvatar(fileID int64) error {
