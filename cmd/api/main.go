@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/GunarsK-portfolio/admin-api/docs"
 	"github.com/GunarsK-portfolio/admin-api/internal/config"
@@ -10,6 +11,8 @@ import (
 	"github.com/GunarsK-portfolio/admin-api/internal/repository"
 	"github.com/GunarsK-portfolio/admin-api/internal/routes"
 	commondb "github.com/GunarsK-portfolio/portfolio-common/database"
+	"github.com/GunarsK-portfolio/portfolio-common/logger"
+	"github.com/GunarsK-portfolio/portfolio-common/metrics"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,10 +25,22 @@ import (
 // @in header
 // @name Authorization
 func main() {
-	// Load configuration
 	cfg := config.Load()
 
-	// Connect to database
+	appLogger := logger.New(logger.Config{
+		Level:       os.Getenv("LOG_LEVEL"),
+		Format:      os.Getenv("LOG_FORMAT"),
+		ServiceName: "admin-api",
+		AddSource:   os.Getenv("LOG_SOURCE") == "true",
+	})
+
+	appLogger.Info("Starting admin API", "version", "1.0")
+
+	metricsCollector := metrics.New(metrics.Config{
+		ServiceName: "admin",
+		Namespace:   "portfolio",
+	})
+
 	db, err := commondb.Connect(commondb.PostgresConfig{
 		Host:     cfg.DBHost,
 		Port:     cfg.DBPort,
@@ -36,24 +51,24 @@ func main() {
 		TimeZone: "UTC",
 	})
 	if err != nil {
+		appLogger.Error("Failed to connect to database", "error", err)
 		log.Fatal("Failed to connect to database:", err)
 	}
+	appLogger.Info("Database connection established")
 
-	// Initialize repository
 	repo := repository.New(db, cfg.FilesAPIURL)
-
-	// Initialize handlers
 	handler := handlers.New(repo)
 
-	// Setup router
-	router := gin.Default()
+	router := gin.New()
+	router.Use(logger.Recovery(appLogger))
+	router.Use(logger.RequestLogger(appLogger))
+	router.Use(metricsCollector.Middleware())
 
-	// Setup routes
-	routes.Setup(router, handler, cfg)
+	routes.Setup(router, handler, cfg, metricsCollector)
 
-	// Start server
-	log.Printf("Starting admin API on port %s", cfg.Port)
+	appLogger.Info("Admin API ready", "port", cfg.Port, "environment", os.Getenv("ENVIRONMENT"))
 	if err := router.Run(fmt.Sprintf(":%s", cfg.Port)); err != nil {
+		appLogger.Error("Failed to start server", "error", err)
 		log.Fatal("Failed to start server:", err)
 	}
 }
