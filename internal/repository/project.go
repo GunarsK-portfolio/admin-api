@@ -2,18 +2,35 @@ package repository
 
 import (
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
+	"github.com/GunarsK-portfolio/portfolio-common/utils"
 	"gorm.io/gorm"
 )
 
 func (r *repository) GetAllPortfolioProjects() ([]models.PortfolioProject, error) {
 	var projects []models.PortfolioProject
 	err := r.db.Preload("Technologies").Preload("ImageFile").Order("display_order ASC, created_at DESC").Find(&projects).Error
-	return projects, err
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate image URLs for all projects
+	for i := range projects {
+		utils.PopulateFileURL(projects[i].ImageFile, r.filesAPIURL)
+	}
+
+	return projects, nil
 }
 
 func (r *repository) GetPortfolioProjectByID(id int64) (*models.PortfolioProject, error) {
 	var project models.PortfolioProject
 	err := r.db.Preload("Technologies").Preload("ImageFile").First(&project, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate image URL
+	utils.PopulateFileURL(project.ImageFile, r.filesAPIURL)
+
 	return &project, err
 }
 
