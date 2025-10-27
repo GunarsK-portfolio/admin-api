@@ -1,11 +1,25 @@
 package repository
 
-import "github.com/GunarsK-portfolio/admin-api/internal/models"
+import (
+	"github.com/GunarsK-portfolio/admin-api/internal/models"
+	"github.com/GunarsK-portfolio/portfolio-common/utils"
+)
 
 func (r *repository) GetProfile() (*models.Profile, error) {
 	var profile models.Profile
-	err := r.db.First(&profile).Error
-	return &profile, err
+	err := r.db.
+		Preload("AvatarFile").
+		Preload("ResumeFile").
+		First(&profile).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Populate file URLs using helper
+	utils.PopulateFileURL(profile.AvatarFile, r.filesAPIURL)
+	utils.PopulateFileURL(profile.ResumeFile, r.filesAPIURL)
+
+	return &profile, nil
 }
 
 func (r *repository) UpdateProfile(profile *models.Profile) error {
