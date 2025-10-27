@@ -1,11 +1,33 @@
 package repository
 
-import "github.com/GunarsK-portfolio/admin-api/internal/models"
+import (
+	"fmt"
+
+	"github.com/GunarsK-portfolio/admin-api/internal/models"
+)
 
 func (r *repository) GetProfile() (*models.Profile, error) {
 	var profile models.Profile
-	err := r.db.First(&profile).Error
-	return &profile, err
+	err := r.db.
+		Preload("AvatarFile").
+		Preload("ResumeFile").
+		First(&profile).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct avatar URL
+	if profile.AvatarFile != nil {
+		profile.AvatarURL = fmt.Sprintf("%s/files/%s/%s", r.filesAPIURL, profile.AvatarFile.FileType, profile.AvatarFile.S3Key)
+	}
+
+	// Construct resume URL and filename
+	if profile.ResumeFile != nil {
+		profile.ResumeURL = fmt.Sprintf("%s/files/%s/%s", r.filesAPIURL, profile.ResumeFile.FileType, profile.ResumeFile.S3Key)
+		profile.ResumeFileName = profile.ResumeFile.FileName
+	}
+
+	return &profile, nil
 }
 
 func (r *repository) UpdateProfile(profile *models.Profile) error {
