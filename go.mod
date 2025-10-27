@@ -3,7 +3,7 @@ module github.com/GunarsK-portfolio/admin-api
 go 1.25.2
 
 require (
-	github.com/GunarsK-portfolio/portfolio-common v0.6.0
+	github.com/GunarsK-portfolio/portfolio-common v0.7.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/swaggo/files v1.0.1

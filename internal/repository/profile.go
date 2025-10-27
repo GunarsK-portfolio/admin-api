@@ -1,9 +1,8 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
+	"github.com/GunarsK-portfolio/portfolio-common/utils"
 )
 
 func (r *repository) GetProfile() (*models.Profile, error) {
@@ -16,16 +15,9 @@ func (r *repository) GetProfile() (*models.Profile, error) {
 		return nil, err
 	}
 
-	// Construct avatar URL
-	if profile.AvatarFile != nil {
-		profile.AvatarURL = fmt.Sprintf("%s/files/%s/%s", r.filesAPIURL, profile.AvatarFile.FileType, profile.AvatarFile.S3Key)
-	}
-
-	// Construct resume URL and filename
-	if profile.ResumeFile != nil {
-		profile.ResumeURL = fmt.Sprintf("%s/files/%s/%s", r.filesAPIURL, profile.ResumeFile.FileType, profile.ResumeFile.S3Key)
-		profile.ResumeFileName = profile.ResumeFile.FileName
-	}
+	// Populate file URLs using helper
+	utils.PopulateFileURL(profile.AvatarFile, r.filesAPIURL)
+	utils.PopulateFileURL(profile.ResumeFile, r.filesAPIURL)
 
 	return &profile, nil
 }
