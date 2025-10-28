@@ -35,7 +35,7 @@ RESTful API for managing portfolio content with authentication.
 
 ## Project Structure
 
-```
+```text
 admin-api/
 ├── cmd/
 │   └── api/              # Application entrypoint
@@ -62,11 +62,13 @@ docker-compose up -d
 ### Local Development
 
 1. Copy environment file:
+
 ```bash
 cp .env.example .env
 ```
 
-2. Update `.env` with your configuration:
+1. Update `.env` with your configuration:
+
 ```env
 PORT=8083
 DB_HOST=localhost
@@ -78,13 +80,15 @@ AUTH_SERVICE_URL=http://localhost:8084/api/v1
 FILES_API_URL=http://localhost:8085/api/v1
 ```
 
-3. Start infrastructure and auth-service (if not running):
+1. Start infrastructure and auth-service (if not running):
+
 ```bash
 # From infrastructure directory
 docker-compose up -d postgres flyway auth-service
 ```
 
-4. Run the service:
+1. Run the service:
+
 ```bash
 go run cmd/api/main.go
 ```
@@ -92,6 +96,7 @@ go run cmd/api/main.go
 ## Available Commands
 
 Using Task:
+
 ```bash
 # Development
 task dev:swagger         # Generate Swagger documentation
@@ -124,6 +129,7 @@ task ci:all              # Run all CI checks (format, tidy, lint, vet, test, vul
 ```
 
 Using Go directly:
+
 ```bash
 go run cmd/api/main.go                      # Run
 go build -o bin/admin-api cmd/api/main.go   # Build
@@ -134,9 +140,11 @@ go test ./...                                # Test
 
 Base URL: `http://localhost:8083/api/v1`
 
-All endpoints (except health check) require JWT authentication via `Authorization: Bearer <token>` header.
+All endpoints (except health check) require JWT authentication via
+`Authorization: Bearer <token>` header.
 
 ### Health Check
+
 - `GET /health` - Service health status
 
 ### Portfolio Domain
@@ -144,6 +152,7 @@ All endpoints (except health check) require JWT authentication via `Authorizatio
 All portfolio endpoints are under `/portfolio` path.
 
 #### Profile
+
 - `GET /portfolio/profile` - Get profile information
 - `PUT /portfolio/profile` - Update profile
 - `PUT /portfolio/profile/avatar` - Update profile avatar (by file ID)
@@ -152,6 +161,7 @@ All portfolio endpoints are under `/portfolio` path.
 - `DELETE /portfolio/profile/resume` - Remove profile resume
 
 #### Work Experience
+
 - `GET /portfolio/experience` - List all work experience
 - `POST /portfolio/experience` - Create work experience entry
 - `GET /portfolio/experience/:id` - Get work experience by ID
@@ -159,6 +169,7 @@ All portfolio endpoints are under `/portfolio` path.
 - `DELETE /portfolio/experience/:id` - Delete work experience
 
 #### Certifications
+
 - `GET /portfolio/certifications` - List all certifications
 - `POST /portfolio/certifications` - Create certification
 - `GET /portfolio/certifications/:id` - Get certification by ID
@@ -166,6 +177,7 @@ All portfolio endpoints are under `/portfolio` path.
 - `DELETE /portfolio/certifications/:id` - Delete certification
 
 #### Skills
+
 - `GET /portfolio/skills` - List all skills
 - `POST /portfolio/skills` - Create new skill
 - `GET /portfolio/skills/:id` - Get skill by ID
@@ -173,6 +185,7 @@ All portfolio endpoints are under `/portfolio` path.
 - `DELETE /portfolio/skills/:id` - Delete skill
 
 #### Skill Types
+
 - `GET /portfolio/skill-types` - List all skill types
 - `POST /portfolio/skill-types` - Create skill type
 - `GET /portfolio/skill-types/:id` - Get skill type by ID
@@ -180,6 +193,7 @@ All portfolio endpoints are under `/portfolio` path.
 - `DELETE /portfolio/skill-types/:id` - Delete skill type
 
 #### Portfolio Projects
+
 - `GET /portfolio/projects` - List all portfolio projects
 - `POST /portfolio/projects` - Create new portfolio project
 - `GET /portfolio/projects/:id` - Get portfolio project by ID
@@ -191,6 +205,7 @@ All portfolio endpoints are under `/portfolio` path.
 All miniature endpoints are under `/miniatures` path.
 
 #### Miniature Themes
+
 - `GET /miniatures/themes` - List all miniature themes
 - `POST /miniatures/themes` - Create miniature theme
 - `GET /miniatures/themes/:id` - Get miniature theme by ID
@@ -198,6 +213,7 @@ All miniature endpoints are under `/miniatures` path.
 - `DELETE /miniatures/themes/:id` - Delete miniature theme
 
 #### Miniature Projects
+
 - `GET /miniatures/projects` - List all miniature projects
 - `POST /miniatures/projects` - Create miniature project
 - `GET /miniatures/projects/:id` - Get miniature project by ID
@@ -206,13 +222,15 @@ All miniature endpoints are under `/miniatures` path.
 
 ### Files
 
-Generic file deletion endpoint (works for all file types: avatars, resumes, project images, miniature images).
+Generic file deletion endpoint (works for all file types: avatars,
+resumes, project images, miniature images).
 
 - `DELETE /files/:id` - Delete file by ID (removes file record and associations)
 
 ## Swagger Documentation
 
 When running, Swagger UI is available at:
+
 - `http://localhost:8083/swagger/index.html`
 
 ## Environment Variables
@@ -225,12 +243,14 @@ When running, Swagger UI is available at:
 | `DB_USER` | Database user | `portfolio_admin` |
 | `DB_PASSWORD` | Database password | `portfolio_admin_dev_pass` |
 | `DB_NAME` | Database name | `portfolio` |
-| `AUTH_SERVICE_URL` | Auth service URL (for JWT validation) | `http://localhost:8084/api/v1` |
-| `FILES_API_URL` | Files API URL (for constructing file URLs) | `http://localhost:8085/api/v1` |
+| `AUTH_SERVICE_URL` | Auth service URL | `http://localhost:8084/api/v1` |
+| `FILES_API_URL` | Files API URL (file URLs) | `http://localhost:8085/api/v1` |
 
 ## Authentication
 
-This API validates JWT tokens issued by auth-service using the portfolio-common auth middleware. The middleware:
+This API validates JWT tokens issued by auth-service using the
+portfolio-common auth middleware. The middleware:
+
 1. Extracts token from `Authorization: Bearer <token>` header
 2. Validates token with auth-service
 3. Injects user information into request context
