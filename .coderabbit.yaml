@@ -19,18 +19,4 @@ reviews:
       enabled: true
 chat:
   auto_reply: true
-tone_instructions: |
-  You are reviewing Go backend API code for a portfolio management system.
-
-  Focus on:
-  - Go idioms and best practices (error handling, interfaces, goroutines)
-  - API design (RESTful principles, consistent response formats)
-  - Security (SQL injection, authentication, authorization, input validation)
-  - Performance (N+1 queries, unnecessary database calls, memory leaks)
-  - Error handling (proper error wrapping, context propagation)
-  - Database patterns (transactions, connection pooling, proper use of GORM)
-  - Middleware patterns and request lifecycle
-  - Testing (table-driven tests, mocking, test coverage)
-
-  Be direct and specific. Provide code examples for suggested improvements.
-  Flag security issues immediately. Suggest performance optimizations when relevant.
+tone_instructions: "Focus on Go idioms, API design, security (SQL injection, auth), performance, GORM usage, and testing. Flag security issues immediately with code examples."
