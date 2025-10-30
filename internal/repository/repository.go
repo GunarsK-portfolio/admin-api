@@ -101,11 +101,36 @@ func checkRowsAffected(result *gorm.DB) error {
 
 // safeUpdate performs an update excluding system fields (ID, CreatedAt, UpdatedAt)
 // Uses Updates to avoid zero-value overwrites unlike Save
+// Checks existence first to ensure idempotent updates (no false 404s)
 func (r *repository) safeUpdate(ctx context.Context, model interface{}, id int64) error {
-	return checkRowsAffected(
-		r.db.WithContext(ctx).Model(model).
-			Where("id = ?", id).
-			Omit("ID", "CreatedAt", "UpdatedAt").
-			Updates(model),
-	)
+	return r.safeUpdateWithOptions(ctx, model, id, nil)
+}
+
+// safeUpdateWithAssociations performs safe update with association handling
+// Use for models with has-many or many-to-many relationships
+func (r *repository) safeUpdateWithAssociations(ctx context.Context, model interface{}, id int64) error {
+	return r.safeUpdateWithOptions(ctx, model, id, &gorm.Session{FullSaveAssociations: true})
+}
+
+// safeUpdateWithOptions is the internal implementation
+func (r *repository) safeUpdateWithOptions(ctx context.Context, model interface{}, id int64, session *gorm.Session) error {
+	// Check existence using COUNT to avoid loading data
+	var count int64
+	if err := r.db.WithContext(ctx).Model(model).Where("id = ?", id).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	// Build update query
+	db := r.db.WithContext(ctx).Model(model).Where("id = ?", id)
+
+	// Apply session options if provided
+	if session != nil {
+		db = db.Session(session)
+	}
+
+	// Now perform update - RowsAffected=0 is OK (idempotent)
+	return db.Omit("ID", "CreatedAt", "UpdatedAt").Updates(model).Error
 }

@@ -79,7 +79,7 @@ func (h *Handler) CreatePortfolioProject(c *gin.Context) {
 	}
 
 	if err := h.repo.CreatePortfolioProject(c.Request.Context(), &project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create portfolio project"})
+		handleRepositoryError(c, err, "", "failed to create portfolio project")
 		return
 	}
 

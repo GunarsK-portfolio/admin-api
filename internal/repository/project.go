@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
-	"gorm.io/gorm"
 )
 
 func (r *repository) GetAllPortfolioProjects(ctx context.Context) ([]models.PortfolioProject, error) {
@@ -24,15 +23,8 @@ func (r *repository) CreatePortfolioProject(ctx context.Context, project *models
 }
 
 func (r *repository) UpdatePortfolioProject(ctx context.Context, project *models.PortfolioProject) error {
-	// Use Updates with FullSaveAssociations for associations (Technologies)
-	// Omit system fields to prevent zero-value overwrites
-	return checkRowsAffected(
-		r.db.WithContext(ctx).Model(project).
-			Where("id = ?", project.ID).
-			Session(&gorm.Session{FullSaveAssociations: true}).
-			Omit("ID", "CreatedAt", "UpdatedAt").
-			Updates(project),
-	)
+	// Use safeUpdateWithAssociations for Technologies many-to-many relationship
+	return r.safeUpdateWithAssociations(ctx, project, project.ID)
 }
 
 // DeletePortfolioProject deletes a portfolio project and automatically cascades to:

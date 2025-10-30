@@ -79,7 +79,7 @@ func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateMiniaturePaint(c.Request.Context(), &paint); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature paint"})
+		handleRepositoryError(c, err, "", "failed to create miniature paint")
 		return
 	}
 

@@ -79,7 +79,7 @@ func (h *Handler) CreateCertification(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateCertification(c.Request.Context(), &cert); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create certification"})
+		handleRepositoryError(c, err, "", "failed to create certification")
 		return
 	}
 

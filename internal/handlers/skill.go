@@ -81,7 +81,7 @@ func (h *Handler) CreateSkill(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateSkill(c.Request.Context(), &skill); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create skill"})
+		handleRepositoryError(c, err, "", "failed to create skill")
 		return
 	}
 
@@ -224,7 +224,7 @@ func (h *Handler) CreateSkillType(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateSkillType(c.Request.Context(), &skillType); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create skill type"})
+		handleRepositoryError(c, err, "", "failed to create skill type")
 		return
 	}
 

@@ -79,7 +79,7 @@ func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateMiniatureTheme(c.Request.Context(), &theme); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature theme"})
+		handleRepositoryError(c, err, "", "failed to create miniature theme")
 		return
 	}
 

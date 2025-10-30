@@ -79,7 +79,7 @@ func (h *Handler) CreateWorkExperience(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateWorkExperience(c.Request.Context(), &exp); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create work experience"})
+		handleRepositoryError(c, err, "", "failed to create work experience")
 		return
 	}
 

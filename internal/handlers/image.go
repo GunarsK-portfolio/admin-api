@@ -16,6 +16,7 @@ import (
 // @Param id path int true "Miniature File ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /files/{id} [delete]
 func (h *Handler) DeleteImage(c *gin.Context) {
@@ -26,7 +27,7 @@ func (h *Handler) DeleteImage(c *gin.Context) {
 	}
 
 	if err := h.repo.DeleteImage(c.Request.Context(), id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete image"})
+		handleRepositoryError(c, err, "image not found", "failed to delete image")
 		return
 	}
 

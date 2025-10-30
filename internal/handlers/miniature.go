@@ -79,7 +79,7 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 	}
 
 	if err := h.repo.CreateMiniatureProject(c.Request.Context(), &project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature project"})
+		handleRepositoryError(c, err, "", "failed to create miniature project")
 		return
 	}
 
