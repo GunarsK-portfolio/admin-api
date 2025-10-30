@@ -15,12 +15,13 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} models.Profile
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/profile [get]
 func (h *Handler) GetProfile(c *gin.Context) {
 	profile, err := h.repo.GetProfile()
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "profile not found"})
+		handleRepositoryError(c, err, "profile not found", "failed to fetch profile")
 		return
 	}
 

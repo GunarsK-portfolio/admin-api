@@ -63,7 +63,7 @@ func (r *repository) CreateMiniatureProject(project *models.MiniatureProject) er
 }
 
 func (r *repository) UpdateMiniatureProject(project *models.MiniatureProject) error {
-	return r.db.Save(project).Error
+	return checkRowsAffected(r.db.Save(project))
 }
 
 // DeleteMiniatureProject deletes a miniature project and automatically cascades to:
@@ -72,5 +72,5 @@ func (r *repository) UpdateMiniatureProject(project *models.MiniatureProject) er
 // - miniatures.miniature_paints (links to paints)
 // Note: Actual files in storage.files are NOT deleted (cleanup job handles orphaned files)
 func (r *repository) DeleteMiniatureProject(id int64) error {
-	return r.db.Delete(&models.MiniatureProject{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.MiniatureProject{}, id))
 }

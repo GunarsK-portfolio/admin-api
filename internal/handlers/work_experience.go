@@ -37,6 +37,7 @@ func (h *Handler) GetAllWorkExperience(c *gin.Context) {
 // @Success 200 {object} models.WorkExperience
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/experience/{id} [get]
 func (h *Handler) GetWorkExperienceByID(c *gin.Context) {
@@ -48,7 +49,7 @@ func (h *Handler) GetWorkExperienceByID(c *gin.Context) {
 
 	exp, err := h.repo.GetWorkExperienceByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "work experience not found"})
+		handleRepositoryError(c, err, "work experience not found", "failed to fetch work experience")
 		return
 	}
 
@@ -93,6 +94,7 @@ func (h *Handler) CreateWorkExperience(c *gin.Context) {
 // @Param experience body models.WorkExperience true "Work experience data"
 // @Success 200 {object} models.WorkExperience
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/experience/{id} [put]
 func (h *Handler) UpdateWorkExperience(c *gin.Context) {
@@ -110,7 +112,7 @@ func (h *Handler) UpdateWorkExperience(c *gin.Context) {
 
 	exp.ID = id
 	if err := h.repo.UpdateWorkExperience(&exp); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update work experience"})
+		handleRepositoryError(c, err, "work experience not found", "failed to update work experience")
 		return
 	}
 
@@ -125,6 +127,7 @@ func (h *Handler) UpdateWorkExperience(c *gin.Context) {
 // @Param id path int true "Work Experience ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/experience/{id} [delete]
 func (h *Handler) DeleteWorkExperience(c *gin.Context) {
@@ -135,7 +138,7 @@ func (h *Handler) DeleteWorkExperience(c *gin.Context) {
 	}
 
 	if err := h.repo.DeleteWorkExperience(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete work experience"})
+		handleRepositoryError(c, err, "work experience not found", "failed to delete work experience")
 		return
 	}
 

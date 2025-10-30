@@ -21,11 +21,11 @@ func (r *repository) CreateSkill(skill *models.Skill) error {
 }
 
 func (r *repository) UpdateSkill(skill *models.Skill) error {
-	return r.db.Save(skill).Error
+	return checkRowsAffected(r.db.Save(skill))
 }
 
 func (r *repository) DeleteSkill(id int64) error {
-	return r.db.Delete(&models.Skill{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.Skill{}, id))
 }
 
 // Skill Types
@@ -47,9 +47,9 @@ func (r *repository) CreateSkillType(skillType *models.SkillType) error {
 }
 
 func (r *repository) UpdateSkillType(skillType *models.SkillType) error {
-	return r.db.Save(skillType).Error
+	return checkRowsAffected(r.db.Save(skillType))
 }
 
 func (r *repository) DeleteSkillType(id int64) error {
-	return r.db.Delete(&models.SkillType{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.SkillType{}, id))
 }

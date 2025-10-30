@@ -37,6 +37,7 @@ func (h *Handler) GetAllCertifications(c *gin.Context) {
 // @Success 200 {object} models.Certification
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications/{id} [get]
 func (h *Handler) GetCertificationByID(c *gin.Context) {
@@ -48,7 +49,7 @@ func (h *Handler) GetCertificationByID(c *gin.Context) {
 
 	cert, err := h.repo.GetCertificationByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "certification not found"})
+		handleRepositoryError(c, err, "certification not found", "failed to fetch certification")
 		return
 	}
 
@@ -93,6 +94,7 @@ func (h *Handler) CreateCertification(c *gin.Context) {
 // @Param certification body models.Certification true "Certification data"
 // @Success 200 {object} models.Certification
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications/{id} [put]
 func (h *Handler) UpdateCertification(c *gin.Context) {
@@ -110,7 +112,7 @@ func (h *Handler) UpdateCertification(c *gin.Context) {
 
 	cert.ID = id
 	if err := h.repo.UpdateCertification(&cert); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update certification"})
+		handleRepositoryError(c, err, "certification not found", "failed to update certification")
 		return
 	}
 
@@ -125,6 +127,7 @@ func (h *Handler) UpdateCertification(c *gin.Context) {
 // @Param id path int true "Certification ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications/{id} [delete]
 func (h *Handler) DeleteCertification(c *gin.Context) {
@@ -135,7 +138,7 @@ func (h *Handler) DeleteCertification(c *gin.Context) {
 	}
 
 	if err := h.repo.DeleteCertification(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete certification"})
+		handleRepositoryError(c, err, "certification not found", "failed to delete certification")
 		return
 	}
 

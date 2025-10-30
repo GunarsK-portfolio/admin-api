@@ -19,9 +19,9 @@ func (r *repository) CreateMiniaturePaint(paint *models.MiniaturePaint) error {
 }
 
 func (r *repository) UpdateMiniaturePaint(paint *models.MiniaturePaint) error {
-	return r.db.Save(paint).Error
+	return checkRowsAffected(r.db.Save(paint))
 }
 
 func (r *repository) DeleteMiniaturePaint(id int64) error {
-	return r.db.Delete(&models.MiniaturePaint{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.MiniaturePaint{}, id))
 }

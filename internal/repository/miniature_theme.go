@@ -19,9 +19,9 @@ func (r *repository) CreateMiniatureTheme(theme *models.MiniatureTheme) error {
 }
 
 func (r *repository) UpdateMiniatureTheme(theme *models.MiniatureTheme) error {
-	return r.db.Save(theme).Error
+	return checkRowsAffected(r.db.Save(theme))
 }
 
 func (r *repository) DeleteMiniatureTheme(id int64) error {
-	return r.db.Delete(&models.MiniatureTheme{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.MiniatureTheme{}, id))
 }

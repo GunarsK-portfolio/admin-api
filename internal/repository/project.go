@@ -23,12 +23,12 @@ func (r *repository) CreatePortfolioProject(project *models.PortfolioProject) er
 
 func (r *repository) UpdatePortfolioProject(project *models.PortfolioProject) error {
 	// Save will update all fields including associations
-	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Save(project).Error
+	return checkRowsAffected(r.db.Session(&gorm.Session{FullSaveAssociations: true}).Save(project))
 }
 
 // DeletePortfolioProject deletes a portfolio project and automatically cascades to:
 // - portfolio.project_technologies (links to skills/technologies)
 // Note: Image file in storage.files is NOT deleted (cleanup job handles orphaned files)
 func (r *repository) DeletePortfolioProject(id int64) error {
-	return r.db.Delete(&models.PortfolioProject{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.PortfolioProject{}, id))
 }

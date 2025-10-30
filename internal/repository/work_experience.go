@@ -19,9 +19,9 @@ func (r *repository) CreateWorkExperience(exp *models.WorkExperience) error {
 }
 
 func (r *repository) UpdateWorkExperience(exp *models.WorkExperience) error {
-	return r.db.Save(exp).Error
+	return checkRowsAffected(r.db.Save(exp))
 }
 
 func (r *repository) DeleteWorkExperience(id int64) error {
-	return r.db.Delete(&models.WorkExperience{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.WorkExperience{}, id))
 }

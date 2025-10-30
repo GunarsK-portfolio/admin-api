@@ -37,6 +37,7 @@ func (h *Handler) GetAllMiniaturePaints(c *gin.Context) {
 // @Success 200 {object} models.MiniaturePaint
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/paints/{id} [get]
 func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
@@ -48,7 +49,7 @@ func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
 
 	paint, err := h.repo.GetMiniaturePaintByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "miniature paint not found"})
+		handleRepositoryError(c, err, "miniature paint not found", "failed to fetch miniature paint")
 		return
 	}
 
@@ -93,6 +94,7 @@ func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 // @Param paint body models.MiniaturePaint true "Paint data"
 // @Success 200 {object} models.MiniaturePaint
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/paints/{id} [put]
 func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
@@ -110,7 +112,7 @@ func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
 
 	paint.ID = id
 	if err := h.repo.UpdateMiniaturePaint(&paint); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update miniature paint"})
+		handleRepositoryError(c, err, "miniature paint not found", "failed to update miniature paint")
 		return
 	}
 
@@ -125,6 +127,7 @@ func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
 // @Param id path int true "Paint ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/paints/{id} [delete]
 func (h *Handler) DeleteMiniaturePaint(c *gin.Context) {
@@ -135,7 +138,7 @@ func (h *Handler) DeleteMiniaturePaint(c *gin.Context) {
 	}
 
 	if err := h.repo.DeleteMiniaturePaint(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete miniature paint"})
+		handleRepositoryError(c, err, "miniature paint not found", "failed to delete miniature paint")
 		return
 	}
 

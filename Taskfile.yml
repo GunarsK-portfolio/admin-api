@@ -63,7 +63,7 @@ tasks:
   dev:swagger:
     desc: Generate Swagger documentation
     cmds:
-      - swag init -g cmd/api/main.go -o docs
+      - swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal
 
   dev:install-tools:
     desc: Install development and CI tools

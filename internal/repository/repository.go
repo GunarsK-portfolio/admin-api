@@ -85,3 +85,14 @@ func New(db *gorm.DB, filesAPIURL string) Repository {
 		filesAPIURL: filesAPIURL,
 	}
 }
+
+// checkRowsAffected returns gorm.ErrRecordNotFound if no rows were affected
+func checkRowsAffected(result *gorm.DB) error {
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

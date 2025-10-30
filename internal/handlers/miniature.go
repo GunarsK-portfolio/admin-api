@@ -37,6 +37,7 @@ func (h *Handler) GetAllMiniatureProjects(c *gin.Context) {
 // @Success 200 {object} models.MiniatureProject
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects/{id} [get]
 func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
@@ -48,7 +49,7 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 
 	project, err := h.repo.GetMiniatureProjectByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "miniature project not found"})
+		handleRepositoryError(c, err, "miniature project not found", "failed to fetch miniature project")
 		return
 	}
 
@@ -93,6 +94,7 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 // @Param project body models.MiniatureProject true "Miniature project data"
 // @Success 200 {object} models.MiniatureProject
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects/{id} [put]
 func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
@@ -110,7 +112,7 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 
 	project.ID = id
 	if err := h.repo.UpdateMiniatureProject(&project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update miniature project"})
+		handleRepositoryError(c, err, "miniature project not found", "failed to update miniature project")
 		return
 	}
 
@@ -127,6 +129,7 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 // @Param id path int true "Miniature Project ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects/{id} [delete]
 func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
@@ -137,7 +140,7 @@ func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
 	}
 
 	if err := h.repo.DeleteMiniatureProject(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete miniature project"})
+		handleRepositoryError(c, err, "miniature project not found", "failed to delete miniature project")
 		return
 	}
 

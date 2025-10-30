@@ -19,9 +19,9 @@ func (r *repository) CreateCertification(cert *models.Certification) error {
 }
 
 func (r *repository) UpdateCertification(cert *models.Certification) error {
-	return r.db.Save(cert).Error
+	return checkRowsAffected(r.db.Save(cert))
 }
 
 func (r *repository) DeleteCertification(id int64) error {
-	return r.db.Delete(&models.Certification{}, id).Error
+	return checkRowsAffected(r.db.Delete(&models.Certification{}, id))
 }
