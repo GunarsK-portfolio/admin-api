@@ -15,11 +15,11 @@ func (r *repository) GetMiniatureThemeByID(id int64) (*models.MiniatureTheme, er
 }
 
 func (r *repository) CreateMiniatureTheme(theme *models.MiniatureTheme) error {
-	return r.db.Create(theme).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(theme).Error
 }
 
 func (r *repository) UpdateMiniatureTheme(theme *models.MiniatureTheme) error {
-	return checkRowsAffected(r.db.Save(theme))
+	return r.safeUpdate(theme, theme.ID)
 }
 
 func (r *repository) DeleteMiniatureTheme(id int64) error {

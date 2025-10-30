@@ -15,11 +15,11 @@ func (r *repository) GetCertificationByID(id int64) (*models.Certification, erro
 }
 
 func (r *repository) CreateCertification(cert *models.Certification) error {
-	return r.db.Create(cert).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(cert).Error
 }
 
 func (r *repository) UpdateCertification(cert *models.Certification) error {
-	return checkRowsAffected(r.db.Save(cert))
+	return r.safeUpdate(cert, cert.ID)
 }
 
 func (r *repository) DeleteCertification(id int64) error {

@@ -66,6 +66,7 @@ func (h *Handler) GetWorkExperienceByID(c *gin.Context) {
 // @Param experience body models.WorkExperience true "Work experience data"
 // @Success 201 {object} models.WorkExperience
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/experience [post]
 func (h *Handler) CreateWorkExperience(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *Handler) CreateWorkExperience(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, exp.ID)
 	c.JSON(http.StatusCreated, exp)
 }
 

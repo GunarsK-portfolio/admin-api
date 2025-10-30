@@ -66,6 +66,7 @@ func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 // @Param theme body models.MiniatureTheme true "Miniature theme data"
 // @Success 201 {object} models.MiniatureTheme
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/themes [post]
 func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, theme.ID)
 	c.JSON(http.StatusCreated, theme)
 }
 

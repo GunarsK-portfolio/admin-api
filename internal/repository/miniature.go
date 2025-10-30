@@ -59,11 +59,11 @@ func (r *repository) convertMiniatureFilesToImages(files []models.MiniatureFile)
 }
 
 func (r *repository) CreateMiniatureProject(project *models.MiniatureProject) error {
-	return r.db.Create(project).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(project).Error
 }
 
 func (r *repository) UpdateMiniatureProject(project *models.MiniatureProject) error {
-	return checkRowsAffected(r.db.Save(project))
+	return r.safeUpdate(project, project.ID)
 }
 
 // DeleteMiniatureProject deletes a miniature project and automatically cascades to:

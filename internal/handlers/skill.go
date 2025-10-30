@@ -68,6 +68,7 @@ func (h *Handler) GetSkillByID(c *gin.Context) {
 // @Param skill body models.Skill true "Skill data"
 // @Success 201 {object} models.Skill
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skills [post]
 func (h *Handler) CreateSkill(c *gin.Context) {
@@ -82,6 +83,7 @@ func (h *Handler) CreateSkill(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, skill.ID)
 	c.JSON(http.StatusCreated, skill)
 }
 
@@ -207,6 +209,7 @@ func (h *Handler) GetSkillTypeByID(c *gin.Context) {
 // @Param skillType body models.SkillType true "Skill type data"
 // @Success 201 {object} models.SkillType
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skill-types [post]
 func (h *Handler) CreateSkillType(c *gin.Context) {
@@ -221,6 +224,7 @@ func (h *Handler) CreateSkillType(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, skillType.ID)
 	c.JSON(http.StatusCreated, skillType)
 }
 

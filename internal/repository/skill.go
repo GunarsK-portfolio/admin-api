@@ -17,11 +17,11 @@ func (r *repository) GetSkillByID(id int64) (*models.Skill, error) {
 }
 
 func (r *repository) CreateSkill(skill *models.Skill) error {
-	return r.db.Create(skill).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(skill).Error
 }
 
 func (r *repository) UpdateSkill(skill *models.Skill) error {
-	return checkRowsAffected(r.db.Save(skill))
+	return r.safeUpdate(skill, skill.ID)
 }
 
 func (r *repository) DeleteSkill(id int64) error {
@@ -43,11 +43,11 @@ func (r *repository) GetSkillTypeByID(id int64) (*models.SkillType, error) {
 }
 
 func (r *repository) CreateSkillType(skillType *models.SkillType) error {
-	return r.db.Create(skillType).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(skillType).Error
 }
 
 func (r *repository) UpdateSkillType(skillType *models.SkillType) error {
-	return checkRowsAffected(r.db.Save(skillType))
+	return r.safeUpdate(skillType, skillType.ID)
 }
 
 func (r *repository) DeleteSkillType(id int64) error {

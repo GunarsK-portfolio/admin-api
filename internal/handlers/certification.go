@@ -66,6 +66,7 @@ func (h *Handler) GetCertificationByID(c *gin.Context) {
 // @Param certification body models.Certification true "Certification data"
 // @Success 201 {object} models.Certification
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications [post]
 func (h *Handler) CreateCertification(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *Handler) CreateCertification(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, cert.ID)
 	c.JSON(http.StatusCreated, cert)
 }
 

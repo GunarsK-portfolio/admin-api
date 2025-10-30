@@ -18,12 +18,19 @@ func (r *repository) GetPortfolioProjectByID(id int64) (*models.PortfolioProject
 }
 
 func (r *repository) CreatePortfolioProject(project *models.PortfolioProject) error {
-	return r.db.Create(project).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(project).Error
 }
 
 func (r *repository) UpdatePortfolioProject(project *models.PortfolioProject) error {
-	// Save will update all fields including associations
-	return checkRowsAffected(r.db.Session(&gorm.Session{FullSaveAssociations: true}).Save(project))
+	// Use Updates with FullSaveAssociations for associations (Technologies)
+	// Omit system fields to prevent zero-value overwrites
+	return checkRowsAffected(
+		r.db.Model(project).
+			Where("id = ?", project.ID).
+			Session(&gorm.Session{FullSaveAssociations: true}).
+			Omit("ID", "CreatedAt", "UpdatedAt").
+			Updates(project),
+	)
 }
 
 // DeletePortfolioProject deletes a portfolio project and automatically cascades to:

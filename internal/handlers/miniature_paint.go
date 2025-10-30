@@ -66,6 +66,7 @@ func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
 // @Param paint body models.MiniaturePaint true "Paint data"
 // @Success 201 {object} models.MiniaturePaint
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/paints [post]
 func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, paint.ID)
 	c.JSON(http.StatusCreated, paint)
 }
 
@@ -95,6 +97,7 @@ func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 // @Success 200 {object} models.MiniaturePaint
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/paints/{id} [put]
 func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
@@ -128,6 +131,7 @@ func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/paints/{id} [delete]
 func (h *Handler) DeleteMiniaturePaint(c *gin.Context) {

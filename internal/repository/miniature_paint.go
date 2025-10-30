@@ -15,11 +15,11 @@ func (r *repository) GetMiniaturePaintByID(id int64) (*models.MiniaturePaint, er
 }
 
 func (r *repository) CreateMiniaturePaint(paint *models.MiniaturePaint) error {
-	return r.db.Create(paint).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(paint).Error
 }
 
 func (r *repository) UpdateMiniaturePaint(paint *models.MiniaturePaint) error {
-	return checkRowsAffected(r.db.Save(paint))
+	return r.safeUpdate(paint, paint.ID)
 }
 
 func (r *repository) DeleteMiniaturePaint(id int64) error {

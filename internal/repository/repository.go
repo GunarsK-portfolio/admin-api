@@ -96,3 +96,14 @@ func checkRowsAffected(result *gorm.DB) error {
 	}
 	return nil
 }
+
+// safeUpdate performs an update excluding system fields (ID, CreatedAt, UpdatedAt)
+// Uses Updates to avoid zero-value overwrites unlike Save
+func (r *repository) safeUpdate(model interface{}, id int64) error {
+	return checkRowsAffected(
+		r.db.Model(model).
+			Where("id = ?", id).
+			Omit("ID", "CreatedAt", "UpdatedAt").
+			Updates(model),
+	)
+}

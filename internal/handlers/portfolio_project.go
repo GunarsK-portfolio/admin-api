@@ -66,6 +66,7 @@ func (h *Handler) GetPortfolioProjectByID(c *gin.Context) {
 // @Param project body models.PortfolioProject true "Portfolio project data"
 // @Success 201 {object} models.PortfolioProject
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/projects [post]
 func (h *Handler) CreatePortfolioProject(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *Handler) CreatePortfolioProject(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, project.ID)
 	c.JSON(http.StatusCreated, project)
 }
 

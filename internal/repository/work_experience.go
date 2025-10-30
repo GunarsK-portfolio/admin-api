@@ -15,11 +15,11 @@ func (r *repository) GetWorkExperienceByID(id int64) (*models.WorkExperience, er
 }
 
 func (r *repository) CreateWorkExperience(exp *models.WorkExperience) error {
-	return r.db.Create(exp).Error
+	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(exp).Error
 }
 
 func (r *repository) UpdateWorkExperience(exp *models.WorkExperience) error {
-	return checkRowsAffected(r.db.Save(exp))
+	return r.safeUpdate(exp, exp.ID)
 }
 
 func (r *repository) DeleteWorkExperience(id int64) error {

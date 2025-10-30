@@ -66,6 +66,7 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 // @Param project body models.MiniatureProject true "Miniature project data"
 // @Success 201 {object} models.MiniatureProject
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects [post]
 func (h *Handler) CreateMiniatureProject(c *gin.Context) {
@@ -80,6 +81,7 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 		return
 	}
 
+	setLocationHeader(c, project.ID)
 	c.JSON(http.StatusCreated, project)
 }
 
