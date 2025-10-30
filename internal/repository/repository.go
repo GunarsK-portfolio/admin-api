@@ -42,6 +42,13 @@ type Repository interface {
 	UpdateMiniatureProject(project *models.MiniatureProject) error
 	DeleteMiniatureProject(id int64) error
 
+	// Miniature Paints
+	GetAllMiniaturePaints() ([]models.MiniaturePaint, error)
+	GetMiniaturePaintByID(id int64) (*models.MiniaturePaint, error)
+	CreateMiniaturePaint(paint *models.MiniaturePaint) error
+	UpdateMiniaturePaint(paint *models.MiniaturePaint) error
+	DeleteMiniaturePaint(id int64) error
+
 	// Skills
 	GetAllSkills() ([]models.Skill, error)
 	GetSkillByID(id int64) (*models.Skill, error)

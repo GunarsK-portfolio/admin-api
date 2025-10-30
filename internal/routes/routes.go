@@ -103,6 +103,13 @@ func Setup(router *gin.Engine, handler *handlers.Handler, cfg *config.Config, me
 			miniatures.DELETE("/projects/:id", handler.DeleteMiniatureProject)
 			// TODO: Add miniatures.GET("/projects/:id/images", handler.GetMiniatureProjectImages)
 			// TODO: Add miniatures.POST("/projects/:id/images", handler.AddMiniatureProjectImage)
+
+			// Miniature Paints
+			miniatures.GET("/paints", handler.GetAllMiniaturePaints)
+			miniatures.POST("/paints", handler.CreateMiniaturePaint)
+			miniatures.GET("/paints/:id", handler.GetMiniaturePaintByID)
+			miniatures.PUT("/paints/:id", handler.UpdateMiniaturePaint)
+			miniatures.DELETE("/paints/:id", handler.DeleteMiniaturePaint)
 		}
 
 		// Files (generic file deletion for all file types)
