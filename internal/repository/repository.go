@@ -1,77 +1,79 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
 	// Profile
-	GetProfile() (*models.Profile, error)
-	UpdateProfile(profile *models.Profile) error
-	UpdateProfileAvatar(fileID int64) error
-	DeleteProfileAvatar() error
-	UpdateProfileResume(fileID int64) error
-	DeleteProfileResume() error
+	GetProfile(ctx context.Context) (*models.Profile, error)
+	UpdateProfile(ctx context.Context, profile *models.Profile) error
+	UpdateProfileAvatar(ctx context.Context, fileID int64) error
+	DeleteProfileAvatar(ctx context.Context) error
+	UpdateProfileResume(ctx context.Context, fileID int64) error
+	DeleteProfileResume(ctx context.Context) error
 
 	// Work Experience
-	GetAllWorkExperience() ([]models.WorkExperience, error)
-	GetWorkExperienceByID(id int64) (*models.WorkExperience, error)
-	CreateWorkExperience(exp *models.WorkExperience) error
-	UpdateWorkExperience(exp *models.WorkExperience) error
-	DeleteWorkExperience(id int64) error
+	GetAllWorkExperience(ctx context.Context) ([]models.WorkExperience, error)
+	GetWorkExperienceByID(ctx context.Context, id int64) (*models.WorkExperience, error)
+	CreateWorkExperience(ctx context.Context, exp *models.WorkExperience) error
+	UpdateWorkExperience(ctx context.Context, exp *models.WorkExperience) error
+	DeleteWorkExperience(ctx context.Context, id int64) error
 
 	// Certifications
-	GetAllCertifications() ([]models.Certification, error)
-	GetCertificationByID(id int64) (*models.Certification, error)
-	CreateCertification(cert *models.Certification) error
-	UpdateCertification(cert *models.Certification) error
-	DeleteCertification(id int64) error
+	GetAllCertifications(ctx context.Context) ([]models.Certification, error)
+	GetCertificationByID(ctx context.Context, id int64) (*models.Certification, error)
+	CreateCertification(ctx context.Context, cert *models.Certification) error
+	UpdateCertification(ctx context.Context, cert *models.Certification) error
+	DeleteCertification(ctx context.Context, id int64) error
 
 	// Miniature Themes
-	GetAllMiniatureThemes() ([]models.MiniatureTheme, error)
-	GetMiniatureThemeByID(id int64) (*models.MiniatureTheme, error)
-	CreateMiniatureTheme(theme *models.MiniatureTheme) error
-	UpdateMiniatureTheme(theme *models.MiniatureTheme) error
-	DeleteMiniatureTheme(id int64) error
+	GetAllMiniatureThemes(ctx context.Context) ([]models.MiniatureTheme, error)
+	GetMiniatureThemeByID(ctx context.Context, id int64) (*models.MiniatureTheme, error)
+	CreateMiniatureTheme(ctx context.Context, theme *models.MiniatureTheme) error
+	UpdateMiniatureTheme(ctx context.Context, theme *models.MiniatureTheme) error
+	DeleteMiniatureTheme(ctx context.Context, id int64) error
 
 	// Miniature Projects
-	GetAllMiniatureProjects() ([]models.MiniatureProject, error)
-	GetMiniatureProjectByID(id int64) (*models.MiniatureProject, error)
-	CreateMiniatureProject(project *models.MiniatureProject) error
-	UpdateMiniatureProject(project *models.MiniatureProject) error
-	DeleteMiniatureProject(id int64) error
+	GetAllMiniatureProjects(ctx context.Context) ([]models.MiniatureProject, error)
+	GetMiniatureProjectByID(ctx context.Context, id int64) (*models.MiniatureProject, error)
+	CreateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error
+	UpdateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error
+	DeleteMiniatureProject(ctx context.Context, id int64) error
 
 	// Miniature Paints
-	GetAllMiniaturePaints() ([]models.MiniaturePaint, error)
-	GetMiniaturePaintByID(id int64) (*models.MiniaturePaint, error)
-	CreateMiniaturePaint(paint *models.MiniaturePaint) error
-	UpdateMiniaturePaint(paint *models.MiniaturePaint) error
-	DeleteMiniaturePaint(id int64) error
+	GetAllMiniaturePaints(ctx context.Context) ([]models.MiniaturePaint, error)
+	GetMiniaturePaintByID(ctx context.Context, id int64) (*models.MiniaturePaint, error)
+	CreateMiniaturePaint(ctx context.Context, paint *models.MiniaturePaint) error
+	UpdateMiniaturePaint(ctx context.Context, paint *models.MiniaturePaint) error
+	DeleteMiniaturePaint(ctx context.Context, id int64) error
 
 	// Skills
-	GetAllSkills() ([]models.Skill, error)
-	GetSkillByID(id int64) (*models.Skill, error)
-	CreateSkill(skill *models.Skill) error
-	UpdateSkill(skill *models.Skill) error
-	DeleteSkill(id int64) error
+	GetAllSkills(ctx context.Context) ([]models.Skill, error)
+	GetSkillByID(ctx context.Context, id int64) (*models.Skill, error)
+	CreateSkill(ctx context.Context, skill *models.Skill) error
+	UpdateSkill(ctx context.Context, skill *models.Skill) error
+	DeleteSkill(ctx context.Context, id int64) error
 
 	// Skill Types
-	GetAllSkillTypes() ([]models.SkillType, error)
-	GetSkillTypeByID(id int64) (*models.SkillType, error)
-	CreateSkillType(skillType *models.SkillType) error
-	UpdateSkillType(skillType *models.SkillType) error
-	DeleteSkillType(id int64) error
+	GetAllSkillTypes(ctx context.Context) ([]models.SkillType, error)
+	GetSkillTypeByID(ctx context.Context, id int64) (*models.SkillType, error)
+	CreateSkillType(ctx context.Context, skillType *models.SkillType) error
+	UpdateSkillType(ctx context.Context, skillType *models.SkillType) error
+	DeleteSkillType(ctx context.Context, id int64) error
 
 	// Portfolio Projects
-	GetAllPortfolioProjects() ([]models.PortfolioProject, error)
-	GetPortfolioProjectByID(id int64) (*models.PortfolioProject, error)
-	CreatePortfolioProject(project *models.PortfolioProject) error
-	UpdatePortfolioProject(project *models.PortfolioProject) error
-	DeletePortfolioProject(id int64) error
+	GetAllPortfolioProjects(ctx context.Context) ([]models.PortfolioProject, error)
+	GetPortfolioProjectByID(ctx context.Context, id int64) (*models.PortfolioProject, error)
+	CreatePortfolioProject(ctx context.Context, project *models.PortfolioProject) error
+	UpdatePortfolioProject(ctx context.Context, project *models.PortfolioProject) error
+	DeletePortfolioProject(ctx context.Context, id int64) error
 
 	// Images/Files (MinIO storage references)
-	DeleteImage(id int64) error
+	DeleteImage(ctx context.Context, id int64) error
 }
 
 type repository struct {
@@ -99,9 +101,9 @@ func checkRowsAffected(result *gorm.DB) error {
 
 // safeUpdate performs an update excluding system fields (ID, CreatedAt, UpdatedAt)
 // Uses Updates to avoid zero-value overwrites unlike Save
-func (r *repository) safeUpdate(model interface{}, id int64) error {
+func (r *repository) safeUpdate(ctx context.Context, model interface{}, id int64) error {
 	return checkRowsAffected(
-		r.db.Model(model).
+		r.db.WithContext(ctx).Model(model).
 			Where("id = ?", id).
 			Omit("ID", "CreatedAt", "UpdatedAt").
 			Updates(model),

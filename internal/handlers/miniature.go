@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.MiniatureProject
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /miniatures/projects [get]
 func (h *Handler) GetAllMiniatureProjects(c *gin.Context) {
-	projects, err := h.repo.GetAllMiniatureProjects()
+	projects, err := h.repo.GetAllMiniatureProjects(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature projects"})
 		return
@@ -47,7 +48,7 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 		return
 	}
 
-	project, err := h.repo.GetMiniatureProjectByID(id)
+	project, err := h.repo.GetMiniatureProjectByID(c.Request.Context(), id)
 	if err != nil {
 		handleRepositoryError(c, err, "miniature project not found", "failed to fetch miniature project")
 		return
@@ -65,6 +66,7 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param project body models.MiniatureProject true "Miniature project data"
 // @Success 201 {object} models.MiniatureProject
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -76,7 +78,7 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateMiniatureProject(&project); err != nil {
+	if err := h.repo.CreateMiniatureProject(c.Request.Context(), &project); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature project"})
 		return
 	}
@@ -113,7 +115,7 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 	}
 
 	project.ID = id
-	if err := h.repo.UpdateMiniatureProject(&project); err != nil {
+	if err := h.repo.UpdateMiniatureProject(c.Request.Context(), &project); err != nil {
 		handleRepositoryError(c, err, "miniature project not found", "failed to update miniature project")
 		return
 	}
@@ -141,7 +143,7 @@ func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteMiniatureProject(id); err != nil {
+	if err := h.repo.DeleteMiniatureProject(c.Request.Context(), id); err != nil {
 		handleRepositoryError(c, err, "miniature project not found", "failed to delete miniature project")
 		return
 	}

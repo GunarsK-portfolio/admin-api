@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.MiniaturePaint
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /miniatures/paints [get]
 func (h *Handler) GetAllMiniaturePaints(c *gin.Context) {
-	paints, err := h.repo.GetAllMiniaturePaints()
+	paints, err := h.repo.GetAllMiniaturePaints(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature paints"})
 		return
@@ -47,7 +48,7 @@ func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
 		return
 	}
 
-	paint, err := h.repo.GetMiniaturePaintByID(id)
+	paint, err := h.repo.GetMiniaturePaintByID(c.Request.Context(), id)
 	if err != nil {
 		handleRepositoryError(c, err, "miniature paint not found", "failed to fetch miniature paint")
 		return
@@ -65,6 +66,7 @@ func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param paint body models.MiniaturePaint true "Paint data"
 // @Success 201 {object} models.MiniaturePaint
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -76,7 +78,7 @@ func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateMiniaturePaint(&paint); err != nil {
+	if err := h.repo.CreateMiniaturePaint(c.Request.Context(), &paint); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature paint"})
 		return
 	}
@@ -114,7 +116,7 @@ func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
 	}
 
 	paint.ID = id
-	if err := h.repo.UpdateMiniaturePaint(&paint); err != nil {
+	if err := h.repo.UpdateMiniaturePaint(c.Request.Context(), &paint); err != nil {
 		handleRepositoryError(c, err, "miniature paint not found", "failed to update miniature paint")
 		return
 	}
@@ -141,7 +143,7 @@ func (h *Handler) DeleteMiniaturePaint(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteMiniaturePaint(id); err != nil {
+	if err := h.repo.DeleteMiniaturePaint(c.Request.Context(), id); err != nil {
 		handleRepositoryError(c, err, "miniature paint not found", "failed to delete miniature paint")
 		return
 	}

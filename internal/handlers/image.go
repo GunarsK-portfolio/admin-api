@@ -25,7 +25,7 @@ func (h *Handler) DeleteImage(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteImage(id); err != nil {
+	if err := h.repo.DeleteImage(c.Request.Context(), id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete image"})
 		return
 	}

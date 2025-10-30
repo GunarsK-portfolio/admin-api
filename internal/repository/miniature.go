@@ -1,15 +1,17 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/GunarsK-portfolio/portfolio-common/utils"
 	"gorm.io/gorm"
 )
 
-func (r *repository) GetAllMiniatureProjects() ([]models.MiniatureProject, error) {
+func (r *repository) GetAllMiniatureProjects(ctx context.Context) ([]models.MiniatureProject, error) {
 	var projects []models.MiniatureProject
 	// Preload Theme and MiniatureFiles (with nested File from storage.files)
-	err := r.db.
+	err := r.db.WithContext(ctx).
 		Preload("Theme").
 		Preload("MiniatureFiles", func(db *gorm.DB) *gorm.DB {
 			return db.Order("miniatures.miniature_files.display_order ASC")
@@ -26,10 +28,10 @@ func (r *repository) GetAllMiniatureProjects() ([]models.MiniatureProject, error
 	return projects, err
 }
 
-func (r *repository) GetMiniatureProjectByID(id int64) (*models.MiniatureProject, error) {
+func (r *repository) GetMiniatureProjectByID(ctx context.Context, id int64) (*models.MiniatureProject, error) {
 	var project models.MiniatureProject
 	// Preload Theme and MiniatureFiles (with nested File from storage.files)
-	err := r.db.
+	err := r.db.WithContext(ctx).
 		Preload("Theme").
 		Preload("MiniatureFiles", func(db *gorm.DB) *gorm.DB {
 			return db.Order("miniatures.miniature_files.display_order ASC")
@@ -58,12 +60,12 @@ func (r *repository) convertMiniatureFilesToImages(files []models.MiniatureFile)
 	return images
 }
 
-func (r *repository) CreateMiniatureProject(project *models.MiniatureProject) error {
-	return r.db.Omit("ID", "CreatedAt", "UpdatedAt").Create(project).Error
+func (r *repository) CreateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error {
+	return r.db.WithContext(ctx).Omit("ID", "CreatedAt", "UpdatedAt").Create(project).Error
 }
 
-func (r *repository) UpdateMiniatureProject(project *models.MiniatureProject) error {
-	return r.safeUpdate(project, project.ID)
+func (r *repository) UpdateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error {
+	return r.safeUpdate(ctx, project, project.ID)
 }
 
 // DeleteMiniatureProject deletes a miniature project and automatically cascades to:
@@ -71,6 +73,6 @@ func (r *repository) UpdateMiniatureProject(project *models.MiniatureProject) er
 // - miniatures.miniature_techniques (links to techniques)
 // - miniatures.miniature_paints (links to paints)
 // Note: Actual files in storage.files are NOT deleted (cleanup job handles orphaned files)
-func (r *repository) DeleteMiniatureProject(id int64) error {
-	return checkRowsAffected(r.db.Delete(&models.MiniatureProject{}, id))
+func (r *repository) DeleteMiniatureProject(ctx context.Context, id int64) error {
+	return checkRowsAffected(r.db.WithContext(ctx).Delete(&models.MiniatureProject{}, id))
 }

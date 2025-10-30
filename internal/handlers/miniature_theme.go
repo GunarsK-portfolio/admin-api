@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.MiniatureTheme
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /miniatures/themes [get]
 func (h *Handler) GetAllMiniatureThemes(c *gin.Context) {
-	themes, err := h.repo.GetAllMiniatureThemes()
+	themes, err := h.repo.GetAllMiniatureThemes(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature themes"})
 		return
@@ -47,7 +48,7 @@ func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 		return
 	}
 
-	theme, err := h.repo.GetMiniatureThemeByID(id)
+	theme, err := h.repo.GetMiniatureThemeByID(c.Request.Context(), id)
 	if err != nil {
 		handleRepositoryError(c, err, "miniature theme not found", "failed to fetch miniature theme")
 		return
@@ -65,6 +66,7 @@ func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param theme body models.MiniatureTheme true "Miniature theme data"
 // @Success 201 {object} models.MiniatureTheme
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -76,7 +78,7 @@ func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateMiniatureTheme(&theme); err != nil {
+	if err := h.repo.CreateMiniatureTheme(c.Request.Context(), &theme); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature theme"})
 		return
 	}
@@ -113,7 +115,7 @@ func (h *Handler) UpdateMiniatureTheme(c *gin.Context) {
 	}
 
 	theme.ID = id
-	if err := h.repo.UpdateMiniatureTheme(&theme); err != nil {
+	if err := h.repo.UpdateMiniatureTheme(c.Request.Context(), &theme); err != nil {
 		handleRepositoryError(c, err, "miniature theme not found", "failed to update miniature theme")
 		return
 	}
@@ -139,7 +141,7 @@ func (h *Handler) DeleteMiniatureTheme(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteMiniatureTheme(id); err != nil {
+	if err := h.repo.DeleteMiniatureTheme(c.Request.Context(), id); err != nil {
 		handleRepositoryError(c, err, "miniature theme not found", "failed to delete miniature theme")
 		return
 	}
