@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.MiniatureProject
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /miniatures/projects [get]
 func (h *Handler) GetAllMiniatureProjects(c *gin.Context) {
-	projects, err := h.repo.GetAllMiniatureProjects()
+	projects, err := h.repo.GetAllMiniatureProjects(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature projects"})
 		return
@@ -37,6 +38,7 @@ func (h *Handler) GetAllMiniatureProjects(c *gin.Context) {
 // @Success 200 {object} models.MiniatureProject
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects/{id} [get]
 func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
@@ -46,9 +48,9 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 		return
 	}
 
-	project, err := h.repo.GetMiniatureProjectByID(id)
+	project, err := h.repo.GetMiniatureProjectByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "miniature project not found"})
+		handleRepositoryError(c, err, "miniature project not found", "failed to fetch miniature project")
 		return
 	}
 
@@ -64,7 +66,9 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param project body models.MiniatureProject true "Miniature project data"
 // @Success 201 {object} models.MiniatureProject
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects [post]
 func (h *Handler) CreateMiniatureProject(c *gin.Context) {
@@ -74,11 +78,12 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateMiniatureProject(&project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature project"})
+	if err := h.repo.CreateMiniatureProject(c.Request.Context(), &project); err != nil {
+		handleRepositoryError(c, err, "", "failed to create miniature project")
 		return
 	}
 
+	setLocationHeader(c, project.ID)
 	c.JSON(http.StatusCreated, project)
 }
 
@@ -93,6 +98,7 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 // @Param project body models.MiniatureProject true "Miniature project data"
 // @Success 200 {object} models.MiniatureProject
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects/{id} [put]
 func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
@@ -109,8 +115,8 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 	}
 
 	project.ID = id
-	if err := h.repo.UpdateMiniatureProject(&project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update miniature project"})
+	if err := h.repo.UpdateMiniatureProject(c.Request.Context(), &project); err != nil {
+		handleRepositoryError(c, err, "miniature project not found", "failed to update miniature project")
 		return
 	}
 
@@ -127,6 +133,7 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 // @Param id path int true "Miniature Project ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects/{id} [delete]
 func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
@@ -136,8 +143,8 @@ func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteMiniatureProject(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete miniature project"})
+	if err := h.repo.DeleteMiniatureProject(c.Request.Context(), id); err != nil {
+		handleRepositoryError(c, err, "miniature project not found", "failed to delete miniature project")
 		return
 	}
 

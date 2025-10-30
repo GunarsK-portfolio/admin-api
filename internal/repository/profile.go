@@ -1,13 +1,15 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/GunarsK-portfolio/portfolio-common/utils"
 )
 
-func (r *repository) GetProfile() (*models.Profile, error) {
+func (r *repository) GetProfile(ctx context.Context) (*models.Profile, error) {
 	var profile models.Profile
-	err := r.db.
+	err := r.db.WithContext(ctx).
 		Preload("AvatarFile").
 		Preload("ResumeFile").
 		First(&profile).Error
@@ -22,18 +24,18 @@ func (r *repository) GetProfile() (*models.Profile, error) {
 	return &profile, nil
 }
 
-func (r *repository) UpdateProfile(profile *models.Profile) error {
+func (r *repository) UpdateProfile(ctx context.Context, profile *models.Profile) error {
 	// Upsert: update if exists, insert if doesn't (singleton pattern)
 	var existing models.Profile
-	err := r.db.First(&existing).Error
+	err := r.db.WithContext(ctx).First(&existing).Error
 
 	if err != nil {
 		// No profile exists, create the first one
-		return r.db.Create(profile).Error
+		return r.db.WithContext(ctx).Create(profile).Error
 	}
 
 	// Profile exists, update it
-	return r.db.Model(&existing).Updates(map[string]interface{}{
+	return r.db.WithContext(ctx).Model(&existing).Updates(map[string]interface{}{
 		"full_name":      profile.FullName,
 		"title":          profile.Title,
 		"bio":            profile.Bio,
@@ -45,26 +47,26 @@ func (r *repository) UpdateProfile(profile *models.Profile) error {
 	}).Error
 }
 
-func (r *repository) UpdateProfileAvatar(fileID int64) error {
-	return r.db.Model(&models.Profile{}).
+func (r *repository) UpdateProfileAvatar(ctx context.Context, fileID int64) error {
+	return r.db.WithContext(ctx).Model(&models.Profile{}).
 		Where("id = (SELECT MIN(id) FROM portfolio.profile)").
 		Update("avatar_file_id", fileID).Error
 }
 
-func (r *repository) DeleteProfileAvatar() error {
-	return r.db.Model(&models.Profile{}).
+func (r *repository) DeleteProfileAvatar(ctx context.Context) error {
+	return r.db.WithContext(ctx).Model(&models.Profile{}).
 		Where("id = (SELECT MIN(id) FROM portfolio.profile)").
 		Update("avatar_file_id", nil).Error
 }
 
-func (r *repository) UpdateProfileResume(fileID int64) error {
-	return r.db.Model(&models.Profile{}).
+func (r *repository) UpdateProfileResume(ctx context.Context, fileID int64) error {
+	return r.db.WithContext(ctx).Model(&models.Profile{}).
 		Where("id = (SELECT MIN(id) FROM portfolio.profile)").
 		Update("resume_file_id", fileID).Error
 }
 
-func (r *repository) DeleteProfileResume() error {
-	return r.db.Model(&models.Profile{}).
+func (r *repository) DeleteProfileResume(ctx context.Context) error {
+	return r.db.WithContext(ctx).Model(&models.Profile{}).
 		Where("id = (SELECT MIN(id) FROM portfolio.profile)").
 		Update("resume_file_id", nil).Error
 }

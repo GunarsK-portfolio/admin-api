@@ -18,9 +18,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.Skill
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /portfolio/skills [get]
 func (h *Handler) GetAllSkills(c *gin.Context) {
-	skills, err := h.repo.GetAllSkills()
+	skills, err := h.repo.GetAllSkills(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch skills"})
 		return
@@ -39,6 +40,7 @@ func (h *Handler) GetAllSkills(c *gin.Context) {
 // @Success 200 {object} models.Skill
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skills/{id} [get]
 func (h *Handler) GetSkillByID(c *gin.Context) {
@@ -48,9 +50,9 @@ func (h *Handler) GetSkillByID(c *gin.Context) {
 		return
 	}
 
-	skill, err := h.repo.GetSkillByID(id)
+	skill, err := h.repo.GetSkillByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "skill not found"})
+		handleRepositoryError(c, err, "skill not found", "failed to fetch skill")
 		return
 	}
 
@@ -66,7 +68,9 @@ func (h *Handler) GetSkillByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param skill body models.Skill true "Skill data"
 // @Success 201 {object} models.Skill
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skills [post]
 func (h *Handler) CreateSkill(c *gin.Context) {
@@ -76,11 +80,12 @@ func (h *Handler) CreateSkill(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateSkill(&skill); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create skill"})
+	if err := h.repo.CreateSkill(c.Request.Context(), &skill); err != nil {
+		handleRepositoryError(c, err, "", "failed to create skill")
 		return
 	}
 
+	setLocationHeader(c, skill.ID)
 	c.JSON(http.StatusCreated, skill)
 }
 
@@ -95,6 +100,7 @@ func (h *Handler) CreateSkill(c *gin.Context) {
 // @Param skill body models.Skill true "Skill data"
 // @Success 200 {object} models.Skill
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skills/{id} [put]
 func (h *Handler) UpdateSkill(c *gin.Context) {
@@ -111,8 +117,8 @@ func (h *Handler) UpdateSkill(c *gin.Context) {
 	}
 
 	skill.ID = id
-	if err := h.repo.UpdateSkill(&skill); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update skill"})
+	if err := h.repo.UpdateSkill(c.Request.Context(), &skill); err != nil {
+		handleRepositoryError(c, err, "skill not found", "failed to update skill")
 		return
 	}
 
@@ -127,6 +133,7 @@ func (h *Handler) UpdateSkill(c *gin.Context) {
 // @Param id path int true "Skill ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skills/{id} [delete]
 func (h *Handler) DeleteSkill(c *gin.Context) {
@@ -136,8 +143,8 @@ func (h *Handler) DeleteSkill(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteSkill(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete skill"})
+	if err := h.repo.DeleteSkill(c.Request.Context(), id); err != nil {
+		handleRepositoryError(c, err, "skill not found", "failed to delete skill")
 		return
 	}
 
@@ -154,9 +161,10 @@ func (h *Handler) DeleteSkill(c *gin.Context) {
 // @Security BearerAuth
 // @Success 200 {array} models.SkillType
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /portfolio/skill-types [get]
 func (h *Handler) GetAllSkillTypes(c *gin.Context) {
-	skillTypes, err := h.repo.GetAllSkillTypes()
+	skillTypes, err := h.repo.GetAllSkillTypes(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch skill types"})
 		return
@@ -175,6 +183,7 @@ func (h *Handler) GetAllSkillTypes(c *gin.Context) {
 // @Success 200 {object} models.SkillType
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skill-types/{id} [get]
 func (h *Handler) GetSkillTypeByID(c *gin.Context) {
@@ -184,9 +193,9 @@ func (h *Handler) GetSkillTypeByID(c *gin.Context) {
 		return
 	}
 
-	skillType, err := h.repo.GetSkillTypeByID(id)
+	skillType, err := h.repo.GetSkillTypeByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "skill type not found"})
+		handleRepositoryError(c, err, "skill type not found", "failed to fetch skill type")
 		return
 	}
 
@@ -202,7 +211,9 @@ func (h *Handler) GetSkillTypeByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param skillType body models.SkillType true "Skill type data"
 // @Success 201 {object} models.SkillType
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skill-types [post]
 func (h *Handler) CreateSkillType(c *gin.Context) {
@@ -212,11 +223,12 @@ func (h *Handler) CreateSkillType(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateSkillType(&skillType); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create skill type"})
+	if err := h.repo.CreateSkillType(c.Request.Context(), &skillType); err != nil {
+		handleRepositoryError(c, err, "", "failed to create skill type")
 		return
 	}
 
+	setLocationHeader(c, skillType.ID)
 	c.JSON(http.StatusCreated, skillType)
 }
 
@@ -231,6 +243,7 @@ func (h *Handler) CreateSkillType(c *gin.Context) {
 // @Param skillType body models.SkillType true "Skill type data"
 // @Success 200 {object} models.SkillType
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skill-types/{id} [put]
 func (h *Handler) UpdateSkillType(c *gin.Context) {
@@ -247,8 +260,8 @@ func (h *Handler) UpdateSkillType(c *gin.Context) {
 	}
 
 	skillType.ID = id
-	if err := h.repo.UpdateSkillType(&skillType); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update skill type"})
+	if err := h.repo.UpdateSkillType(c.Request.Context(), &skillType); err != nil {
+		handleRepositoryError(c, err, "skill type not found", "failed to update skill type")
 		return
 	}
 
@@ -263,6 +276,7 @@ func (h *Handler) UpdateSkillType(c *gin.Context) {
 // @Param id path int true "Skill Type ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/skill-types/{id} [delete]
 func (h *Handler) DeleteSkillType(c *gin.Context) {
@@ -272,8 +286,8 @@ func (h *Handler) DeleteSkillType(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteSkillType(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete skill type"})
+	if err := h.repo.DeleteSkillType(c.Request.Context(), id); err != nil {
+		handleRepositoryError(c, err, "skill type not found", "failed to delete skill type")
 		return
 	}
 

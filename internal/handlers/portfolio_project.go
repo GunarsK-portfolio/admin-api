@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.PortfolioProject
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /portfolio/projects [get]
 func (h *Handler) GetAllPortfolioProjects(c *gin.Context) {
-	projects, err := h.repo.GetAllPortfolioProjects()
+	projects, err := h.repo.GetAllPortfolioProjects(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch portfolio projects"})
 		return
@@ -37,6 +38,7 @@ func (h *Handler) GetAllPortfolioProjects(c *gin.Context) {
 // @Success 200 {object} models.PortfolioProject
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/projects/{id} [get]
 func (h *Handler) GetPortfolioProjectByID(c *gin.Context) {
@@ -46,9 +48,9 @@ func (h *Handler) GetPortfolioProjectByID(c *gin.Context) {
 		return
 	}
 
-	project, err := h.repo.GetPortfolioProjectByID(id)
+	project, err := h.repo.GetPortfolioProjectByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "portfolio project not found"})
+		handleRepositoryError(c, err, "portfolio project not found", "failed to fetch portfolio project")
 		return
 	}
 
@@ -64,7 +66,9 @@ func (h *Handler) GetPortfolioProjectByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param project body models.PortfolioProject true "Portfolio project data"
 // @Success 201 {object} models.PortfolioProject
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/projects [post]
 func (h *Handler) CreatePortfolioProject(c *gin.Context) {
@@ -74,11 +78,12 @@ func (h *Handler) CreatePortfolioProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreatePortfolioProject(&project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create portfolio project"})
+	if err := h.repo.CreatePortfolioProject(c.Request.Context(), &project); err != nil {
+		handleRepositoryError(c, err, "", "failed to create portfolio project")
 		return
 	}
 
+	setLocationHeader(c, project.ID)
 	c.JSON(http.StatusCreated, project)
 }
 
@@ -93,6 +98,7 @@ func (h *Handler) CreatePortfolioProject(c *gin.Context) {
 // @Param project body models.PortfolioProject true "Portfolio project data"
 // @Success 200 {object} models.PortfolioProject
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/projects/{id} [put]
 func (h *Handler) UpdatePortfolioProject(c *gin.Context) {
@@ -109,8 +115,8 @@ func (h *Handler) UpdatePortfolioProject(c *gin.Context) {
 	}
 
 	project.ID = id
-	if err := h.repo.UpdatePortfolioProject(&project); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update portfolio project"})
+	if err := h.repo.UpdatePortfolioProject(c.Request.Context(), &project); err != nil {
+		handleRepositoryError(c, err, "portfolio project not found", "failed to update portfolio project")
 		return
 	}
 
@@ -127,6 +133,7 @@ func (h *Handler) UpdatePortfolioProject(c *gin.Context) {
 // @Param id path int true "Portfolio Project ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/projects/{id} [delete]
 func (h *Handler) DeletePortfolioProject(c *gin.Context) {
@@ -136,8 +143,8 @@ func (h *Handler) DeletePortfolioProject(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeletePortfolioProject(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete portfolio project"})
+	if err := h.repo.DeletePortfolioProject(c.Request.Context(), id); err != nil {
+		handleRepositoryError(c, err, "portfolio project not found", "failed to delete portfolio project")
 		return
 	}
 

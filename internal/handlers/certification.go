@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.Certification
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /portfolio/certifications [get]
 func (h *Handler) GetAllCertifications(c *gin.Context) {
-	certs, err := h.repo.GetAllCertifications()
+	certs, err := h.repo.GetAllCertifications(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch certifications"})
 		return
@@ -37,6 +38,7 @@ func (h *Handler) GetAllCertifications(c *gin.Context) {
 // @Success 200 {object} models.Certification
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications/{id} [get]
 func (h *Handler) GetCertificationByID(c *gin.Context) {
@@ -46,9 +48,9 @@ func (h *Handler) GetCertificationByID(c *gin.Context) {
 		return
 	}
 
-	cert, err := h.repo.GetCertificationByID(id)
+	cert, err := h.repo.GetCertificationByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "certification not found"})
+		handleRepositoryError(c, err, "certification not found", "failed to fetch certification")
 		return
 	}
 
@@ -64,7 +66,9 @@ func (h *Handler) GetCertificationByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param certification body models.Certification true "Certification data"
 // @Success 201 {object} models.Certification
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications [post]
 func (h *Handler) CreateCertification(c *gin.Context) {
@@ -74,11 +78,12 @@ func (h *Handler) CreateCertification(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateCertification(&cert); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create certification"})
+	if err := h.repo.CreateCertification(c.Request.Context(), &cert); err != nil {
+		handleRepositoryError(c, err, "", "failed to create certification")
 		return
 	}
 
+	setLocationHeader(c, cert.ID)
 	c.JSON(http.StatusCreated, cert)
 }
 
@@ -93,6 +98,7 @@ func (h *Handler) CreateCertification(c *gin.Context) {
 // @Param certification body models.Certification true "Certification data"
 // @Success 200 {object} models.Certification
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications/{id} [put]
 func (h *Handler) UpdateCertification(c *gin.Context) {
@@ -109,8 +115,8 @@ func (h *Handler) UpdateCertification(c *gin.Context) {
 	}
 
 	cert.ID = id
-	if err := h.repo.UpdateCertification(&cert); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update certification"})
+	if err := h.repo.UpdateCertification(c.Request.Context(), &cert); err != nil {
+		handleRepositoryError(c, err, "certification not found", "failed to update certification")
 		return
 	}
 
@@ -125,6 +131,7 @@ func (h *Handler) UpdateCertification(c *gin.Context) {
 // @Param id path int true "Certification ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/certifications/{id} [delete]
 func (h *Handler) DeleteCertification(c *gin.Context) {
@@ -134,8 +141,8 @@ func (h *Handler) DeleteCertification(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteCertification(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete certification"})
+	if err := h.repo.DeleteCertification(c.Request.Context(), id); err != nil {
+		handleRepositoryError(c, err, "certification not found", "failed to delete certification")
 		return
 	}
 

@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  models.Certification:
+  github_com_GunarsK-portfolio_admin-api_internal_models.Certification:
     properties:
       createdAt:
         type: string
@@ -25,16 +25,32 @@ definitions:
     - issuer
     - name
     type: object
-  models.Image:
+  github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint:
     properties:
-      caption:
+      colorHex:
+        description: 'ColorHex is the hexadecimal color code in #RRGGBB or #RGB format
+          (e.g., #FF5733, #F00)'
+        type: string
+      createdAt:
         type: string
       id:
         type: integer
-      url:
+      manufacturer:
         type: string
+      name:
+        type: string
+      paintType:
+        description: |-
+          PaintType categorizes the paint (Base, Layer, Shade, Wash, Contrast, Dry, Technical, Metallic, Air, Primer, Edge, Glaze, Ink)
+          Database enforces these values via CHECK constraint
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - manufacturer
+    - name
     type: object
-  models.MiniatureProject:
+  github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject:
     properties:
       completedDate:
         type: string
@@ -49,15 +65,17 @@ definitions:
       id:
         type: integer
       images:
-        description: Computed for frontend from MiniatureFiles
         items:
-          $ref: '#/definitions/models.Image'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image'
         type: array
       manufacturer:
         type: string
       name:
-        description: Frontend expects "name"
         type: string
+      paints:
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint'
+        type: array
       scale:
         type: string
       techniques:
@@ -66,20 +84,22 @@ definitions:
         type: array
       theme:
         allOf:
-        - $ref: '#/definitions/models.MiniatureTheme'
-        description: Associations (loaded with Preload)
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme'
+        description: Associations
       themeId:
         type: integer
       timeSpent:
-        description: Hours as decimal
         type: number
       updatedAt:
         type: string
     required:
     - name
     type: object
-  models.MiniatureTheme:
+  github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme:
     properties:
+      coverImage:
+        description: Computed fields
+        type: string
       coverImageId:
         type: integer
       createdAt:
@@ -92,7 +112,7 @@ definitions:
         type: integer
       miniatures:
         items:
-          $ref: '#/definitions/models.MiniatureProject'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProject'
         type: array
       name:
         type: string
@@ -101,7 +121,7 @@ definitions:
     required:
     - name
     type: object
-  models.PortfolioProject:
+  github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject:
     properties:
       category:
         type: string
@@ -129,7 +149,7 @@ definitions:
         type: integer
       imageFile:
         allOf:
-        - $ref: '#/definitions/models.StorageFile'
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
         description: Associations
       imageFileId:
         type: integer
@@ -151,7 +171,7 @@ definitions:
         type: integer
       technologies:
         items:
-          $ref: '#/definitions/models.Skill'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Skill'
         type: array
       title:
         type: string
@@ -160,8 +180,12 @@ definitions:
     required:
     - title
     type: object
-  models.Profile:
+  github_com_GunarsK-portfolio_admin-api_internal_models.Profile:
     properties:
+      avatarFile:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
+        description: Now exposed to JSON
       avatarFileId:
         type: integer
       createdAt:
@@ -176,10 +200,13 @@ definitions:
         type: string
       phone:
         type: string
+      resumeFile:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
+        description: Now exposed to JSON
       resumeFileId:
         type: integer
       tagline:
-        description: Short bio/tagline
         type: string
       title:
         type: string
@@ -188,7 +215,7 @@ definitions:
     required:
     - name
     type: object
-  models.Skill:
+  github_com_GunarsK-portfolio_admin-api_internal_models.Skill:
     properties:
       createdAt:
         type: string
@@ -201,16 +228,19 @@ definitions:
       skill:
         type: string
       skillType:
-        $ref: '#/definitions/models.SkillType'
+        $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.SkillType'
       skillTypeId:
         type: integer
+      type:
+        description: Computed field
+        type: string
       updatedAt:
         type: string
     required:
     - skill
     - skillTypeId
     type: object
-  models.SkillType:
+  github_com_GunarsK-portfolio_admin-api_internal_models.SkillType:
     properties:
       createdAt:
         type: string
@@ -227,28 +257,7 @@ definitions:
     required:
     - name
     type: object
-  models.StorageFile:
-    properties:
-      createdAt:
-        type: string
-      fileName:
-        type: string
-      fileSize:
-        type: integer
-      fileType:
-        type: string
-      id:
-        type: integer
-      mimeType:
-        type: string
-      s3Bucket:
-        type: string
-      s3Key:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  models.WorkExperience:
+  github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience:
     properties:
       company:
         type: string
@@ -272,6 +281,171 @@ definitions:
     - company
     - position
     - startDate
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.Image:
+    properties:
+      caption:
+        type: string
+      id:
+        type: integer
+      url:
+        type: string
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint:
+    properties:
+      colorHex:
+        description: 'ColorHex is the hexadecimal color code in #RRGGBB or #RGB format
+          (e.g., #FF5733, #F00)'
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      manufacturer:
+        type: string
+      name:
+        type: string
+      paintType:
+        description: |-
+          PaintType categorizes the paint (Base, Layer, Shade, Wash, Contrast, Dry, Technical, Metallic, Air, Primer, Edge, Glaze, Ink)
+          Database enforces these values via CHECK constraint
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - manufacturer
+    - name
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProject:
+    properties:
+      completedDate:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      difficulty:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      images:
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image'
+        type: array
+      manufacturer:
+        type: string
+      name:
+        type: string
+      paints:
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint'
+        type: array
+      scale:
+        type: string
+      techniques:
+        items:
+          type: string
+        type: array
+      theme:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme'
+        description: Associations
+      themeId:
+        type: integer
+      timeSpent:
+        type: number
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme:
+    properties:
+      coverImage:
+        description: Computed fields
+        type: string
+      coverImageId:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      miniatures:
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProject'
+        type: array
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.Skill:
+    properties:
+      createdAt:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      isVisible:
+        type: boolean
+      skill:
+        type: string
+      skillType:
+        $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.SkillType'
+      skillTypeId:
+        type: integer
+      type:
+        description: Computed field
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - skill
+    - skillTypeId
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.SkillType:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.StorageFile:
+    properties:
+      createdAt:
+        type: string
+      fileName:
+        type: string
+      fileSize:
+        type: integer
+      fileType:
+        type: string
+      id:
+        type: integer
+      mimeType:
+        type: string
+      url:
+        description: Computed field
+        type: string
     type: object
 host: localhost:8083
 info:
@@ -311,6 +485,217 @@ paths:
       summary: Delete miniature image
       tags:
       - Files
+  /miniatures/paints:
+    get:
+      description: Get all miniature paint entries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all miniature paints
+      tags:
+      - Miniatures - Paints
+    post:
+      consumes:
+      - application/json
+      description: Create a new miniature paint entry
+      parameters:
+      - description: Paint data
+        in: body
+        name: paint
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
+          schema:
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create miniature paint
+      tags:
+      - Miniatures - Paints
+  /miniatures/paints/{id}:
+    delete:
+      description: Delete a miniature paint entry
+      parameters:
+      - description: Paint ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete miniature paint
+      tags:
+      - Miniatures - Paints
+    get:
+      description: Get a single miniature paint entry by ID
+      parameters:
+      - description: Paint ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get miniature paint by ID
+      tags:
+      - Miniatures - Paints
+    put:
+      consumes:
+      - application/json
+      description: Update an existing miniature paint entry
+      parameters:
+      - description: Paint ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Paint data
+        in: body
+        name: paint
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update miniature paint
+      tags:
+      - Miniatures - Paints
   /miniatures/projects:
     get:
       description: Get all miniature painting projects
@@ -321,10 +706,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.MiniatureProject'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -344,14 +735,18 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/models.MiniatureProject'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.MiniatureProject'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
         "400":
           description: Bad Request
           schema:
@@ -360,6 +755,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -396,6 +797,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete miniature project
@@ -415,7 +822,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MiniatureProject'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
         "400":
           description: Bad Request
           schema:
@@ -430,6 +837,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -454,14 +867,14 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/models.MiniatureProject'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MiniatureProject'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
         "400":
           description: Bad Request
           schema:
@@ -470,6 +883,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -489,10 +908,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.MiniatureTheme'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -512,14 +937,18 @@ paths:
         name: theme
         required: true
         schema:
-          $ref: '#/definitions/models.MiniatureTheme'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.MiniatureTheme'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme'
         "400":
           description: Bad Request
           schema:
@@ -528,6 +957,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -561,6 +996,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete miniature theme
@@ -580,7 +1021,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MiniatureTheme'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme'
         "400":
           description: Bad Request
           schema:
@@ -595,6 +1036,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -619,14 +1066,14 @@ paths:
         name: theme
         required: true
         schema:
-          $ref: '#/definitions/models.MiniatureTheme'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MiniatureTheme'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme'
         "400":
           description: Bad Request
           schema:
@@ -635,6 +1082,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -654,10 +1107,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Certification'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -677,14 +1136,18 @@ paths:
         name: certification
         required: true
         schema:
-          $ref: '#/definitions/models.Certification'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.Certification'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification'
         "400":
           description: Bad Request
           schema:
@@ -693,6 +1156,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -726,6 +1195,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete certification
@@ -745,7 +1220,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Certification'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification'
         "400":
           description: Bad Request
           schema:
@@ -760,6 +1235,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -784,14 +1265,14 @@ paths:
         name: certification
         required: true
         schema:
-          $ref: '#/definitions/models.Certification'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Certification'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification'
         "400":
           description: Bad Request
           schema:
@@ -800,6 +1281,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -819,10 +1306,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.WorkExperience'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -842,14 +1335,18 @@ paths:
         name: experience
         required: true
         schema:
-          $ref: '#/definitions/models.WorkExperience'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.WorkExperience'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience'
         "400":
           description: Bad Request
           schema:
@@ -858,6 +1355,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -891,6 +1394,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete work experience
@@ -910,7 +1419,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.WorkExperience'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience'
         "400":
           description: Bad Request
           schema:
@@ -925,6 +1434,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -949,14 +1464,14 @@ paths:
         name: experience
         required: true
         schema:
-          $ref: '#/definitions/models.WorkExperience'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.WorkExperience'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience'
         "400":
           description: Bad Request
           schema:
@@ -965,6 +1480,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -983,7 +1504,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Profile'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Profile'
         "401":
           description: Unauthorized
           schema:
@@ -992,6 +1513,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1011,14 +1538,14 @@ paths:
         name: profile
         required: true
         schema:
-          $ref: '#/definitions/models.Profile'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Profile'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Profile'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Profile'
         "400":
           description: Bad Request
           schema:
@@ -1162,10 +1689,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.PortfolioProject'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1185,14 +1718,18 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/models.PortfolioProject'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.PortfolioProject'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject'
         "400":
           description: Bad Request
           schema:
@@ -1201,6 +1738,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1237,6 +1780,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete portfolio project
@@ -1256,7 +1805,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.PortfolioProject'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject'
         "400":
           description: Bad Request
           schema:
@@ -1271,6 +1820,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1295,14 +1850,14 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/models.PortfolioProject'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.PortfolioProject'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject'
         "400":
           description: Bad Request
           schema:
@@ -1311,6 +1866,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -1330,10 +1891,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.SkillType'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1353,14 +1920,18 @@ paths:
         name: skillType
         required: true
         schema:
-          $ref: '#/definitions/models.SkillType'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.SkillType'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType'
         "400":
           description: Bad Request
           schema:
@@ -1369,6 +1940,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1402,6 +1979,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete skill type
@@ -1421,7 +2004,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.SkillType'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType'
         "400":
           description: Bad Request
           schema:
@@ -1436,6 +2019,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1460,14 +2049,14 @@ paths:
         name: skillType
         required: true
         schema:
-          $ref: '#/definitions/models.SkillType'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.SkillType'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType'
         "400":
           description: Bad Request
           schema:
@@ -1476,6 +2065,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string
@@ -1495,10 +2090,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Skill'
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill'
             type: array
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1518,14 +2119,18 @@ paths:
         name: skill
         required: true
         schema:
-          $ref: '#/definitions/models.Skill'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill'
       produces:
       - application/json
       responses:
         "201":
           description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              type: string
           schema:
-            $ref: '#/definitions/models.Skill'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill'
         "400":
           description: Bad Request
           schema:
@@ -1534,6 +2139,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1567,6 +2178,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete skill
@@ -1586,7 +2203,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Skill'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill'
         "400":
           description: Bad Request
           schema:
@@ -1601,6 +2218,12 @@ paths:
             type: object
         "404":
           description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1625,14 +2248,14 @@ paths:
         name: skill
         required: true
         schema:
-          $ref: '#/definitions/models.Skill'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Skill'
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill'
         "400":
           description: Bad Request
           schema:
@@ -1641,6 +2264,12 @@ paths:
             type: object
         "401":
           description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties:
               type: string

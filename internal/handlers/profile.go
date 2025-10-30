@@ -15,12 +15,13 @@ import (
 // @Security BearerAuth
 // @Success 200 {object} models.Profile
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/profile [get]
 func (h *Handler) GetProfile(c *gin.Context) {
-	profile, err := h.repo.GetProfile()
+	profile, err := h.repo.GetProfile(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "profile not found"})
+		handleRepositoryError(c, err, "profile not found", "failed to fetch profile")
 		return
 	}
 
@@ -46,7 +47,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.UpdateProfile(&profile); err != nil {
+	if err := h.repo.UpdateProfile(c.Request.Context(), &profile); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile"})
 		return
 	}
@@ -76,7 +77,7 @@ func (h *Handler) UpdateProfileAvatar(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.UpdateProfileAvatar(request.FileID); err != nil {
+	if err := h.repo.UpdateProfileAvatar(c.Request.Context(), request.FileID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update avatar"})
 		return
 	}
@@ -93,7 +94,7 @@ func (h *Handler) UpdateProfileAvatar(c *gin.Context) {
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/profile/avatar [delete]
 func (h *Handler) DeleteProfileAvatar(c *gin.Context) {
-	if err := h.repo.DeleteProfileAvatar(); err != nil {
+	if err := h.repo.DeleteProfileAvatar(c.Request.Context()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete avatar"})
 		return
 	}
@@ -123,7 +124,7 @@ func (h *Handler) UpdateProfileResume(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.UpdateProfileResume(request.FileID); err != nil {
+	if err := h.repo.UpdateProfileResume(c.Request.Context(), request.FileID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update resume"})
 		return
 	}
@@ -140,7 +141,7 @@ func (h *Handler) UpdateProfileResume(c *gin.Context) {
 // @Failure 401 {object} map[string]string
 // @Router /portfolio/profile/resume [delete]
 func (h *Handler) DeleteProfileResume(c *gin.Context) {
-	if err := h.repo.DeleteProfileResume(); err != nil {
+	if err := h.repo.DeleteProfileResume(c.Request.Context()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete resume"})
 		return
 	}

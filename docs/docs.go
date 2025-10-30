@@ -61,6 +61,334 @@ const docTemplate = `{
                 }
             }
         },
+        "/miniatures/paints": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all miniature paint entries",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Paints"
+                ],
+                "summary": "Get all miniature paints",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new miniature paint entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Paints"
+                ],
+                "summary": "Create miniature paint",
+                "parameters": [
+                    {
+                        "description": "Paint data",
+                        "name": "paint",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/miniatures/paints/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a single miniature paint entry by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Paints"
+                ],
+                "summary": "Get miniature paint by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Paint ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing miniature paint entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Paints"
+                ],
+                "summary": "Update miniature paint",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Paint ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Paint data",
+                        "name": "paint",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a miniature paint entry",
+                "tags": [
+                    "Miniatures - Paints"
+                ],
+                "summary": "Delete miniature paint",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Paint ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/miniatures/projects": {
             "get": {
                 "security": [
@@ -82,12 +410,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.MiniatureProject"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -121,7 +458,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
                         }
                     }
                 ],
@@ -129,7 +466,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -143,6 +486,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -181,7 +533,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
                         }
                     },
                     "400": {
@@ -204,6 +556,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -244,7 +605,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
                         }
                     }
                 ],
@@ -252,7 +613,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
                         }
                     },
                     "400": {
@@ -266,6 +627,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -316,6 +686,15 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -341,12 +720,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.MiniatureTheme"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -380,7 +768,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureTheme"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme"
                         }
                     }
                 ],
@@ -388,7 +776,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureTheme"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -402,6 +796,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -440,7 +843,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureTheme"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme"
                         }
                     },
                     "400": {
@@ -463,6 +866,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -503,7 +915,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureTheme"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme"
                         }
                     }
                 ],
@@ -511,7 +923,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.MiniatureTheme"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme"
                         }
                     },
                     "400": {
@@ -525,6 +937,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -575,6 +996,15 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -600,12 +1030,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Certification"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -639,7 +1078,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Certification"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification"
                         }
                     }
                 ],
@@ -647,7 +1086,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Certification"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -661,6 +1106,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -699,7 +1153,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Certification"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification"
                         }
                     },
                     "400": {
@@ -722,6 +1176,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -762,7 +1225,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Certification"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification"
                         }
                     }
                 ],
@@ -770,7 +1233,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Certification"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Certification"
                         }
                     },
                     "400": {
@@ -784,6 +1247,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -834,6 +1306,15 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -859,12 +1340,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.WorkExperience"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -898,7 +1388,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.WorkExperience"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience"
                         }
                     }
                 ],
@@ -906,7 +1396,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.WorkExperience"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -920,6 +1416,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -958,7 +1463,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.WorkExperience"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience"
                         }
                     },
                     "400": {
@@ -981,6 +1486,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1021,7 +1535,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.WorkExperience"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience"
                         }
                     }
                 ],
@@ -1029,7 +1543,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.WorkExperience"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience"
                         }
                     },
                     "400": {
@@ -1043,6 +1557,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1093,6 +1616,15 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -1116,7 +1648,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Profile"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Profile"
                         }
                     },
                     "401": {
@@ -1130,6 +1662,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1163,7 +1704,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Profile"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Profile"
                         }
                     }
                 ],
@@ -1171,7 +1712,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Profile"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Profile"
                         }
                     },
                     "400": {
@@ -1400,12 +1941,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.PortfolioProject"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1439,7 +1989,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PortfolioProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject"
                         }
                     }
                 ],
@@ -1447,7 +1997,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.PortfolioProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -1461,6 +2017,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1499,7 +2064,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.PortfolioProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject"
                         }
                     },
                     "400": {
@@ -1522,6 +2087,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1562,7 +2136,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PortfolioProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject"
                         }
                     }
                 ],
@@ -1570,7 +2144,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.PortfolioProject"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject"
                         }
                     },
                     "400": {
@@ -1584,6 +2158,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1634,6 +2217,15 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -1659,12 +2251,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.SkillType"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1698,7 +2299,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SkillType"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType"
                         }
                     }
                 ],
@@ -1706,7 +2307,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.SkillType"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -1720,6 +2327,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1758,7 +2374,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.SkillType"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType"
                         }
                     },
                     "400": {
@@ -1781,6 +2397,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1821,7 +2446,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SkillType"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType"
                         }
                     }
                 ],
@@ -1829,7 +2454,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.SkillType"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.SkillType"
                         }
                     },
                     "400": {
@@ -1843,6 +2468,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1893,6 +2527,15 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
@@ -1918,12 +2561,21 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Skill"
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill"
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1957,7 +2609,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Skill"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill"
                         }
                     }
                 ],
@@ -1965,7 +2617,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Skill"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill"
+                        },
+                        "headers": {
+                            "Location": {
+                                "type": "string",
+                                "description": "URL of the created resource"
+                            }
                         }
                     },
                     "400": {
@@ -1979,6 +2637,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2017,7 +2684,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Skill"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill"
                         }
                     },
                     "400": {
@@ -2040,6 +2707,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2080,7 +2756,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Skill"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill"
                         }
                     }
                 ],
@@ -2088,7 +2764,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Skill"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.Skill"
                         }
                     },
                     "400": {
@@ -2102,6 +2778,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2152,13 +2837,22 @@ const docTemplate = `{
                                 "type": "string"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "models.Certification": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.Certification": {
             "type": "object",
             "required": [
                 "issueDate",
@@ -2195,21 +2889,39 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Image": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint": {
             "type": "object",
+            "required": [
+                "manufacturer",
+                "name"
+            ],
             "properties": {
-                "caption": {
+                "colorHex": {
+                    "description": "ColorHex is the hexadecimal color code in #RRGGBB or #RGB format (e.g., #FF5733, #F00)",
+                    "type": "string"
+                },
+                "createdAt": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "url": {
+                "manufacturer": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "paintType": {
+                    "description": "PaintType categorizes the paint (Base, Layer, Shade, Wash, Contrast, Dry, Technical, Metallic, Air, Primer, Edge, Glaze, Ink)\nDatabase enforces these values via CHECK constraint",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "models.MiniatureProject": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject": {
             "type": "object",
             "required": [
                 "name"
@@ -2234,18 +2946,22 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "images": {
-                    "description": "Computed for frontend from MiniatureFiles",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Image"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image"
                     }
                 },
                 "manufacturer": {
                     "type": "string"
                 },
                 "name": {
-                    "description": "Frontend expects \"name\"",
                     "type": "string"
+                },
+                "paints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint"
+                    }
                 },
                 "scale": {
                     "type": "string"
@@ -2257,10 +2973,10 @@ const docTemplate = `{
                     }
                 },
                 "theme": {
-                    "description": "Associations (loaded with Preload)",
+                    "description": "Associations",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.MiniatureTheme"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme"
                         }
                     ]
                 },
@@ -2268,7 +2984,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "timeSpent": {
-                    "description": "Hours as decimal",
                     "type": "number"
                 },
                 "updatedAt": {
@@ -2276,12 +2991,16 @@ const docTemplate = `{
                 }
             }
         },
-        "models.MiniatureTheme": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme": {
             "type": "object",
             "required": [
                 "name"
             ],
             "properties": {
+                "coverImage": {
+                    "description": "Computed fields",
+                    "type": "string"
+                },
                 "coverImageId": {
                     "type": "integer"
                 },
@@ -2300,7 +3019,7 @@ const docTemplate = `{
                 "miniatures": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.MiniatureProject"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProject"
                     }
                 },
                 "name": {
@@ -2311,7 +3030,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.PortfolioProject": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.PortfolioProject": {
             "type": "object",
             "required": [
                 "title"
@@ -2357,7 +3076,7 @@ const docTemplate = `{
                     "description": "Associations",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.StorageFile"
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
                         }
                     ]
                 },
@@ -2391,7 +3110,7 @@ const docTemplate = `{
                 "technologies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Skill"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Skill"
                     }
                 },
                 "title": {
@@ -2402,12 +3121,20 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Profile": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.Profile": {
             "type": "object",
             "required": [
                 "name"
             ],
             "properties": {
+                "avatarFile": {
+                    "description": "Now exposed to JSON",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
+                        }
+                    ]
+                },
                 "avatarFileId": {
                     "type": "integer"
                 },
@@ -2429,11 +3156,18 @@ const docTemplate = `{
                 "phone": {
                     "type": "string"
                 },
+                "resumeFile": {
+                    "description": "Now exposed to JSON",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
+                        }
+                    ]
+                },
                 "resumeFileId": {
                     "type": "integer"
                 },
                 "tagline": {
-                    "description": "Short bio/tagline",
                     "type": "string"
                 },
                 "title": {
@@ -2444,7 +3178,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Skill": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.Skill": {
             "type": "object",
             "required": [
                 "skill",
@@ -2467,17 +3201,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "skillType": {
-                    "$ref": "#/definitions/models.SkillType"
+                    "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.SkillType"
                 },
                 "skillTypeId": {
                     "type": "integer"
+                },
+                "type": {
+                    "description": "Computed field",
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
                 }
             }
         },
-        "models.SkillType": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.SkillType": {
             "type": "object",
             "required": [
                 "name"
@@ -2503,39 +3241,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.StorageFile": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "fileName": {
-                    "type": "string"
-                },
-                "fileSize": {
-                    "type": "integer"
-                },
-                "fileType": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mimeType": {
-                    "type": "string"
-                },
-                "s3Bucket": {
-                    "type": "string"
-                },
-                "s3Key": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.WorkExperience": {
+        "github_com_GunarsK-portfolio_admin-api_internal_models.WorkExperience": {
             "type": "object",
             "required": [
                 "company",
@@ -2568,6 +3274,251 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.Image": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint": {
+            "type": "object",
+            "required": [
+                "manufacturer",
+                "name"
+            ],
+            "properties": {
+                "colorHex": {
+                    "description": "ColorHex is the hexadecimal color code in #RRGGBB or #RGB format (e.g., #FF5733, #F00)",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "manufacturer": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "paintType": {
+                    "description": "PaintType categorizes the paint (Base, Layer, Shade, Wash, Contrast, Dry, Technical, Metallic, Air, Primer, Edge, Glaze, Ink)\nDatabase enforces these values via CHECK constraint",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProject": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "completedDate": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "difficulty": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image"
+                    }
+                },
+                "manufacturer": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "paints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint"
+                    }
+                },
+                "scale": {
+                    "type": "string"
+                },
+                "techniques": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "theme": {
+                    "description": "Associations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme"
+                        }
+                    ]
+                },
+                "themeId": {
+                    "type": "integer"
+                },
+                "timeSpent": {
+                    "type": "number"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "coverImage": {
+                    "description": "Computed fields",
+                    "type": "string"
+                },
+                "coverImageId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "miniatures": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProject"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.Skill": {
+            "type": "object",
+            "required": [
+                "skill",
+                "skillTypeId"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isVisible": {
+                    "type": "boolean"
+                },
+                "skill": {
+                    "type": "string"
+                },
+                "skillType": {
+                    "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.SkillType"
+                },
+                "skillTypeId": {
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Computed field",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.SkillType": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.StorageFile": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "fileSize": {
+                    "type": "integer"
+                },
+                "fileType": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mimeType": {
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Computed field",
                     "type": "string"
                 }
             }

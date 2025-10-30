@@ -11,6 +11,7 @@ type Profile = commonModels.Profile
 type PortfolioProject = commonModels.PortfolioProject
 type MiniatureTheme = commonModels.MiniatureTheme
 type MiniatureProject = commonModels.MiniatureProject
+type MiniaturePaint = commonModels.MiniaturePaint
 type MiniatureFile = commonModels.MiniatureFile
 type StorageFile = commonModels.StorageFile
 type Image = commonModels.Image

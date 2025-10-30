@@ -16,9 +16,10 @@ import (
 // @Security BearerAuth
 // @Success 200 {array} models.MiniatureTheme
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /miniatures/themes [get]
 func (h *Handler) GetAllMiniatureThemes(c *gin.Context) {
-	themes, err := h.repo.GetAllMiniatureThemes()
+	themes, err := h.repo.GetAllMiniatureThemes(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature themes"})
 		return
@@ -37,6 +38,7 @@ func (h *Handler) GetAllMiniatureThemes(c *gin.Context) {
 // @Success 200 {object} models.MiniatureTheme
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/themes/{id} [get]
 func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
@@ -46,9 +48,9 @@ func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 		return
 	}
 
-	theme, err := h.repo.GetMiniatureThemeByID(id)
+	theme, err := h.repo.GetMiniatureThemeByID(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "miniature theme not found"})
+		handleRepositoryError(c, err, "miniature theme not found", "failed to fetch miniature theme")
 		return
 	}
 
@@ -64,7 +66,9 @@ func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 // @Security BearerAuth
 // @Param theme body models.MiniatureTheme true "Miniature theme data"
 // @Success 201 {object} models.MiniatureTheme
+// @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/themes [post]
 func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
@@ -74,11 +78,12 @@ func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.CreateMiniatureTheme(&theme); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create miniature theme"})
+	if err := h.repo.CreateMiniatureTheme(c.Request.Context(), &theme); err != nil {
+		handleRepositoryError(c, err, "", "failed to create miniature theme")
 		return
 	}
 
+	setLocationHeader(c, theme.ID)
 	c.JSON(http.StatusCreated, theme)
 }
 
@@ -93,6 +98,7 @@ func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 // @Param theme body models.MiniatureTheme true "Miniature theme data"
 // @Success 200 {object} models.MiniatureTheme
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/themes/{id} [put]
 func (h *Handler) UpdateMiniatureTheme(c *gin.Context) {
@@ -109,8 +115,8 @@ func (h *Handler) UpdateMiniatureTheme(c *gin.Context) {
 	}
 
 	theme.ID = id
-	if err := h.repo.UpdateMiniatureTheme(&theme); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update miniature theme"})
+	if err := h.repo.UpdateMiniatureTheme(c.Request.Context(), &theme); err != nil {
+		handleRepositoryError(c, err, "miniature theme not found", "failed to update miniature theme")
 		return
 	}
 
@@ -125,6 +131,7 @@ func (h *Handler) UpdateMiniatureTheme(c *gin.Context) {
 // @Param id path int true "Miniature Theme ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/themes/{id} [delete]
 func (h *Handler) DeleteMiniatureTheme(c *gin.Context) {
@@ -134,8 +141,8 @@ func (h *Handler) DeleteMiniatureTheme(c *gin.Context) {
 		return
 	}
 
-	if err := h.repo.DeleteMiniatureTheme(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete miniature theme"})
+	if err := h.repo.DeleteMiniatureTheme(c.Request.Context(), id); err != nil {
+		handleRepositoryError(c, err, "miniature theme not found", "failed to delete miniature theme")
 		return
 	}
 
