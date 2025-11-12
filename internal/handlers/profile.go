@@ -3,6 +3,8 @@ package handlers
 import (
 	"net/http"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetProfile(c *gin.Context) {
 	profile, err := h.repo.GetProfile(c.Request.Context())
 	if err != nil {
-		handleRepositoryError(c, err, "profile not found", "failed to fetch profile")
+		commonHandlers.HandleRepositoryError(c, err, "profile not found", "failed to fetch profile")
 		return
 	}
 
@@ -43,12 +45,12 @@ func (h *Handler) GetProfile(c *gin.Context) {
 func (h *Handler) UpdateProfile(c *gin.Context) {
 	var profile models.Profile
 	if err := c.ShouldBindJSON(&profile); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.UpdateProfile(c.Request.Context(), &profile); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to update profile")
 		return
 	}
 
@@ -73,12 +75,12 @@ func (h *Handler) UpdateProfileAvatar(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.UpdateProfileAvatar(c.Request.Context(), request.FileID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update avatar"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to update avatar")
 		return
 	}
 
@@ -95,7 +97,7 @@ func (h *Handler) UpdateProfileAvatar(c *gin.Context) {
 // @Router /portfolio/profile/avatar [delete]
 func (h *Handler) DeleteProfileAvatar(c *gin.Context) {
 	if err := h.repo.DeleteProfileAvatar(c.Request.Context()); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete avatar"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to delete avatar")
 		return
 	}
 
@@ -120,12 +122,12 @@ func (h *Handler) UpdateProfileResume(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.UpdateProfileResume(c.Request.Context(), request.FileID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update resume"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to update resume")
 		return
 	}
 
@@ -142,7 +144,7 @@ func (h *Handler) UpdateProfileResume(c *gin.Context) {
 // @Router /portfolio/profile/resume [delete]
 func (h *Handler) DeleteProfileResume(c *gin.Context) {
 	if err := h.repo.DeleteProfileResume(c.Request.Context()); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete resume"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to delete resume")
 		return
 	}
 

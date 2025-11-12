@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetAllCertifications(c *gin.Context) {
 	certs, err := h.repo.GetAllCertifications(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch certifications"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch certifications")
 		return
 	}
 
@@ -44,13 +46,13 @@ func (h *Handler) GetAllCertifications(c *gin.Context) {
 func (h *Handler) GetCertificationByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	cert, err := h.repo.GetCertificationByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "certification not found", "failed to fetch certification")
+		commonHandlers.HandleRepositoryError(c, err, "certification not found", "failed to fetch certification")
 		return
 	}
 
@@ -74,12 +76,12 @@ func (h *Handler) GetCertificationByID(c *gin.Context) {
 func (h *Handler) CreateCertification(c *gin.Context) {
 	var cert models.Certification
 	if err := c.ShouldBindJSON(&cert); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateCertification(c.Request.Context(), &cert); err != nil {
-		handleRepositoryError(c, err, "", "failed to create certification")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create certification")
 		return
 	}
 
@@ -104,19 +106,19 @@ func (h *Handler) CreateCertification(c *gin.Context) {
 func (h *Handler) UpdateCertification(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var cert models.Certification
 	if err := c.ShouldBindJSON(&cert); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	cert.ID = id
 	if err := h.repo.UpdateCertification(c.Request.Context(), &cert); err != nil {
-		handleRepositoryError(c, err, "certification not found", "failed to update certification")
+		commonHandlers.HandleRepositoryError(c, err, "certification not found", "failed to update certification")
 		return
 	}
 
@@ -137,12 +139,12 @@ func (h *Handler) UpdateCertification(c *gin.Context) {
 func (h *Handler) DeleteCertification(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteCertification(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "certification not found", "failed to delete certification")
+		commonHandlers.HandleRepositoryError(c, err, "certification not found", "failed to delete certification")
 		return
 	}
 

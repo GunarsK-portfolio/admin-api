@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetAllMiniaturePaints(c *gin.Context) {
 	paints, err := h.repo.GetAllMiniaturePaints(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature paints"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch miniature paints")
 		return
 	}
 
@@ -44,13 +46,13 @@ func (h *Handler) GetAllMiniaturePaints(c *gin.Context) {
 func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	paint, err := h.repo.GetMiniaturePaintByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "miniature paint not found", "failed to fetch miniature paint")
+		commonHandlers.HandleRepositoryError(c, err, "miniature paint not found", "failed to fetch miniature paint")
 		return
 	}
 
@@ -74,12 +76,12 @@ func (h *Handler) GetMiniaturePaintByID(c *gin.Context) {
 func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 	var paint models.MiniaturePaint
 	if err := c.ShouldBindJSON(&paint); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateMiniaturePaint(c.Request.Context(), &paint); err != nil {
-		handleRepositoryError(c, err, "", "failed to create miniature paint")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create miniature paint")
 		return
 	}
 
@@ -105,19 +107,19 @@ func (h *Handler) CreateMiniaturePaint(c *gin.Context) {
 func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var paint models.MiniaturePaint
 	if err := c.ShouldBindJSON(&paint); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	paint.ID = id
 	if err := h.repo.UpdateMiniaturePaint(c.Request.Context(), &paint); err != nil {
-		handleRepositoryError(c, err, "miniature paint not found", "failed to update miniature paint")
+		commonHandlers.HandleRepositoryError(c, err, "miniature paint not found", "failed to update miniature paint")
 		return
 	}
 
@@ -139,12 +141,12 @@ func (h *Handler) UpdateMiniaturePaint(c *gin.Context) {
 func (h *Handler) DeleteMiniaturePaint(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteMiniaturePaint(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "miniature paint not found", "failed to delete miniature paint")
+		commonHandlers.HandleRepositoryError(c, err, "miniature paint not found", "failed to delete miniature paint")
 		return
 	}
 

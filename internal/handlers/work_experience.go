@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetAllWorkExperience(c *gin.Context) {
 	experiences, err := h.repo.GetAllWorkExperience(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch work experience"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch work experience")
 		return
 	}
 
@@ -44,13 +46,13 @@ func (h *Handler) GetAllWorkExperience(c *gin.Context) {
 func (h *Handler) GetWorkExperienceByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	exp, err := h.repo.GetWorkExperienceByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "work experience not found", "failed to fetch work experience")
+		commonHandlers.HandleRepositoryError(c, err, "work experience not found", "failed to fetch work experience")
 		return
 	}
 
@@ -74,12 +76,12 @@ func (h *Handler) GetWorkExperienceByID(c *gin.Context) {
 func (h *Handler) CreateWorkExperience(c *gin.Context) {
 	var exp models.WorkExperience
 	if err := c.ShouldBindJSON(&exp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateWorkExperience(c.Request.Context(), &exp); err != nil {
-		handleRepositoryError(c, err, "", "failed to create work experience")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create work experience")
 		return
 	}
 
@@ -104,19 +106,19 @@ func (h *Handler) CreateWorkExperience(c *gin.Context) {
 func (h *Handler) UpdateWorkExperience(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var exp models.WorkExperience
 	if err := c.ShouldBindJSON(&exp); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	exp.ID = id
 	if err := h.repo.UpdateWorkExperience(c.Request.Context(), &exp); err != nil {
-		handleRepositoryError(c, err, "work experience not found", "failed to update work experience")
+		commonHandlers.HandleRepositoryError(c, err, "work experience not found", "failed to update work experience")
 		return
 	}
 
@@ -137,12 +139,12 @@ func (h *Handler) UpdateWorkExperience(c *gin.Context) {
 func (h *Handler) DeleteWorkExperience(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteWorkExperience(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "work experience not found", "failed to delete work experience")
+		commonHandlers.HandleRepositoryError(c, err, "work experience not found", "failed to delete work experience")
 		return
 	}
 

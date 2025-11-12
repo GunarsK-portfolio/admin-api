@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetAllMiniatureProjects(c *gin.Context) {
 	projects, err := h.repo.GetAllMiniatureProjects(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature projects"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch miniature projects")
 		return
 	}
 
@@ -44,13 +46,13 @@ func (h *Handler) GetAllMiniatureProjects(c *gin.Context) {
 func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	project, err := h.repo.GetMiniatureProjectByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "miniature project not found", "failed to fetch miniature project")
+		commonHandlers.HandleRepositoryError(c, err, "miniature project not found", "failed to fetch miniature project")
 		return
 	}
 
@@ -74,12 +76,12 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 	var project models.MiniatureProject
 	if err := c.ShouldBindJSON(&project); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateMiniatureProject(c.Request.Context(), &project); err != nil {
-		handleRepositoryError(c, err, "", "failed to create miniature project")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create miniature project")
 		return
 	}
 
@@ -104,19 +106,19 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var project models.MiniatureProject
 	if err := c.ShouldBindJSON(&project); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	project.ID = id
 	if err := h.repo.UpdateMiniatureProject(c.Request.Context(), &project); err != nil {
-		handleRepositoryError(c, err, "miniature project not found", "failed to update miniature project")
+		commonHandlers.HandleRepositoryError(c, err, "miniature project not found", "failed to update miniature project")
 		return
 	}
 
@@ -139,12 +141,12 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteMiniatureProject(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "miniature project not found", "failed to delete miniature project")
+		commonHandlers.HandleRepositoryError(c, err, "miniature project not found", "failed to delete miniature project")
 		return
 	}
 
