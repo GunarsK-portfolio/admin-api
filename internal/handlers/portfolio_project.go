@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetAllPortfolioProjects(c *gin.Context) {
 	projects, err := h.repo.GetAllPortfolioProjects(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch portfolio projects"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch portfolio projects")
 		return
 	}
 
@@ -44,13 +46,13 @@ func (h *Handler) GetAllPortfolioProjects(c *gin.Context) {
 func (h *Handler) GetPortfolioProjectByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	project, err := h.repo.GetPortfolioProjectByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "portfolio project not found", "failed to fetch portfolio project")
+		commonHandlers.HandleRepositoryError(c, err, "portfolio project not found", "failed to fetch portfolio project")
 		return
 	}
 
@@ -74,12 +76,12 @@ func (h *Handler) GetPortfolioProjectByID(c *gin.Context) {
 func (h *Handler) CreatePortfolioProject(c *gin.Context) {
 	var project models.PortfolioProject
 	if err := c.ShouldBindJSON(&project); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreatePortfolioProject(c.Request.Context(), &project); err != nil {
-		handleRepositoryError(c, err, "", "failed to create portfolio project")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create portfolio project")
 		return
 	}
 
@@ -104,19 +106,19 @@ func (h *Handler) CreatePortfolioProject(c *gin.Context) {
 func (h *Handler) UpdatePortfolioProject(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var project models.PortfolioProject
 	if err := c.ShouldBindJSON(&project); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	project.ID = id
 	if err := h.repo.UpdatePortfolioProject(c.Request.Context(), &project); err != nil {
-		handleRepositoryError(c, err, "portfolio project not found", "failed to update portfolio project")
+		commonHandlers.HandleRepositoryError(c, err, "portfolio project not found", "failed to update portfolio project")
 		return
 	}
 
@@ -139,12 +141,12 @@ func (h *Handler) UpdatePortfolioProject(c *gin.Context) {
 func (h *Handler) DeletePortfolioProject(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeletePortfolioProject(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "portfolio project not found", "failed to delete portfolio project")
+		commonHandlers.HandleRepositoryError(c, err, "portfolio project not found", "failed to delete portfolio project")
 		return
 	}
 

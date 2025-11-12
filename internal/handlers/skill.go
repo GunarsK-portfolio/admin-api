@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +25,7 @@ import (
 func (h *Handler) GetAllSkills(c *gin.Context) {
 	skills, err := h.repo.GetAllSkills(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch skills"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch skills")
 		return
 	}
 
@@ -46,13 +48,13 @@ func (h *Handler) GetAllSkills(c *gin.Context) {
 func (h *Handler) GetSkillByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	skill, err := h.repo.GetSkillByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "skill not found", "failed to fetch skill")
+		commonHandlers.HandleRepositoryError(c, err, "skill not found", "failed to fetch skill")
 		return
 	}
 
@@ -76,12 +78,12 @@ func (h *Handler) GetSkillByID(c *gin.Context) {
 func (h *Handler) CreateSkill(c *gin.Context) {
 	var skill models.Skill
 	if err := c.ShouldBindJSON(&skill); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateSkill(c.Request.Context(), &skill); err != nil {
-		handleRepositoryError(c, err, "", "failed to create skill")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create skill")
 		return
 	}
 
@@ -106,19 +108,19 @@ func (h *Handler) CreateSkill(c *gin.Context) {
 func (h *Handler) UpdateSkill(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var skill models.Skill
 	if err := c.ShouldBindJSON(&skill); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	skill.ID = id
 	if err := h.repo.UpdateSkill(c.Request.Context(), &skill); err != nil {
-		handleRepositoryError(c, err, "skill not found", "failed to update skill")
+		commonHandlers.HandleRepositoryError(c, err, "skill not found", "failed to update skill")
 		return
 	}
 
@@ -139,12 +141,12 @@ func (h *Handler) UpdateSkill(c *gin.Context) {
 func (h *Handler) DeleteSkill(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteSkill(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "skill not found", "failed to delete skill")
+		commonHandlers.HandleRepositoryError(c, err, "skill not found", "failed to delete skill")
 		return
 	}
 
@@ -166,7 +168,7 @@ func (h *Handler) DeleteSkill(c *gin.Context) {
 func (h *Handler) GetAllSkillTypes(c *gin.Context) {
 	skillTypes, err := h.repo.GetAllSkillTypes(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch skill types"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch skill types")
 		return
 	}
 
@@ -189,13 +191,13 @@ func (h *Handler) GetAllSkillTypes(c *gin.Context) {
 func (h *Handler) GetSkillTypeByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	skillType, err := h.repo.GetSkillTypeByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "skill type not found", "failed to fetch skill type")
+		commonHandlers.HandleRepositoryError(c, err, "skill type not found", "failed to fetch skill type")
 		return
 	}
 
@@ -219,12 +221,12 @@ func (h *Handler) GetSkillTypeByID(c *gin.Context) {
 func (h *Handler) CreateSkillType(c *gin.Context) {
 	var skillType models.SkillType
 	if err := c.ShouldBindJSON(&skillType); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateSkillType(c.Request.Context(), &skillType); err != nil {
-		handleRepositoryError(c, err, "", "failed to create skill type")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create skill type")
 		return
 	}
 
@@ -249,19 +251,19 @@ func (h *Handler) CreateSkillType(c *gin.Context) {
 func (h *Handler) UpdateSkillType(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var skillType models.SkillType
 	if err := c.ShouldBindJSON(&skillType); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	skillType.ID = id
 	if err := h.repo.UpdateSkillType(c.Request.Context(), &skillType); err != nil {
-		handleRepositoryError(c, err, "skill type not found", "failed to update skill type")
+		commonHandlers.HandleRepositoryError(c, err, "skill type not found", "failed to update skill type")
 		return
 	}
 
@@ -282,12 +284,12 @@ func (h *Handler) UpdateSkillType(c *gin.Context) {
 func (h *Handler) DeleteSkillType(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteSkillType(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "skill type not found", "failed to delete skill type")
+		commonHandlers.HandleRepositoryError(c, err, "skill type not found", "failed to delete skill type")
 		return
 	}
 

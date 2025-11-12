@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,12 +24,12 @@ import (
 func (h *Handler) DeleteImage(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteImage(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "image not found", "failed to delete image")
+		commonHandlers.HandleRepositoryError(c, err, "image not found", "failed to delete image")
 		return
 	}
 

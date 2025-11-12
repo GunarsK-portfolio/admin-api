@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	commonHandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
+
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ import (
 func (h *Handler) GetAllMiniatureThemes(c *gin.Context) {
 	themes, err := h.repo.GetAllMiniatureThemes(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch miniature themes"})
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch miniature themes")
 		return
 	}
 
@@ -44,13 +46,13 @@ func (h *Handler) GetAllMiniatureThemes(c *gin.Context) {
 func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	theme, err := h.repo.GetMiniatureThemeByID(c.Request.Context(), id)
 	if err != nil {
-		handleRepositoryError(c, err, "miniature theme not found", "failed to fetch miniature theme")
+		commonHandlers.HandleRepositoryError(c, err, "miniature theme not found", "failed to fetch miniature theme")
 		return
 	}
 
@@ -74,12 +76,12 @@ func (h *Handler) GetMiniatureThemeByID(c *gin.Context) {
 func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 	var theme models.MiniatureTheme
 	if err := c.ShouldBindJSON(&theme); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.repo.CreateMiniatureTheme(c.Request.Context(), &theme); err != nil {
-		handleRepositoryError(c, err, "", "failed to create miniature theme")
+		commonHandlers.HandleRepositoryError(c, err, "", "failed to create miniature theme")
 		return
 	}
 
@@ -104,19 +106,19 @@ func (h *Handler) CreateMiniatureTheme(c *gin.Context) {
 func (h *Handler) UpdateMiniatureTheme(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	var theme models.MiniatureTheme
 	if err := c.ShouldBindJSON(&theme); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	theme.ID = id
 	if err := h.repo.UpdateMiniatureTheme(c.Request.Context(), &theme); err != nil {
-		handleRepositoryError(c, err, "miniature theme not found", "failed to update miniature theme")
+		commonHandlers.HandleRepositoryError(c, err, "miniature theme not found", "failed to update miniature theme")
 		return
 	}
 
@@ -137,12 +139,12 @@ func (h *Handler) UpdateMiniatureTheme(c *gin.Context) {
 func (h *Handler) DeleteMiniatureTheme(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid id")
 		return
 	}
 
 	if err := h.repo.DeleteMiniatureTheme(c.Request.Context(), id); err != nil {
-		handleRepositoryError(c, err, "miniature theme not found", "failed to delete miniature theme")
+		commonHandlers.HandleRepositoryError(c, err, "miniature theme not found", "failed to delete miniature theme")
 		return
 	}
 
