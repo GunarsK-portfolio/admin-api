@@ -11,14 +11,23 @@ RUN go mod tidy && go mod download
 RUN go build -o admin-api ./cmd/api
 
 # Production stage
-FROM alpine:latest
+FROM alpine:3.22
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+# Create non-root user
+RUN addgroup -g 1000 app && \
+    adduser -D -u 1000 -G app app
+
+WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/admin-api .
+
+# Change ownership to app user
+RUN chown -R app:app /app
+
+USER app
 
 EXPOSE 8083
 
