@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
 )
@@ -9,17 +10,27 @@ import (
 func (r *repository) GetAllPortfolioProjects(ctx context.Context) ([]models.PortfolioProject, error) {
 	var projects []models.PortfolioProject
 	err := r.db.WithContext(ctx).Preload("Technologies").Preload("ImageFile").Order("display_order ASC, created_at DESC").Find(&projects).Error
-	return projects, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all portfolio projects: %w", err)
+	}
+	return projects, nil
 }
 
 func (r *repository) GetPortfolioProjectByID(ctx context.Context, id int64) (*models.PortfolioProject, error) {
 	var project models.PortfolioProject
 	err := r.db.WithContext(ctx).Preload("Technologies").Preload("ImageFile").First(&project, id).Error
-	return &project, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to get portfolio project with id %d: %w", id, err)
+	}
+	return &project, nil
 }
 
 func (r *repository) CreatePortfolioProject(ctx context.Context, project *models.PortfolioProject) error {
-	return r.db.WithContext(ctx).Omit("ID", "CreatedAt", "UpdatedAt").Create(project).Error
+	err := r.db.WithContext(ctx).Omit("ID", "CreatedAt", "UpdatedAt").Create(project).Error
+	if err != nil {
+		return fmt.Errorf("failed to create portfolio project: %w", err)
+	}
+	return nil
 }
 
 func (r *repository) UpdatePortfolioProject(ctx context.Context, project *models.PortfolioProject) error {
