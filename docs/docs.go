@@ -3132,9 +3132,13 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
-                "coverImage": {
-                    "description": "Computed fields",
-                    "type": "string"
+                "coverImageFile": {
+                    "description": "Associations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
+                        }
+                    ]
                 },
                 "coverImageId": {
                     "type": "integer"
@@ -3535,9 +3539,13 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
-                "coverImage": {
-                    "description": "Computed fields",
-                    "type": "string"
+                "coverImageFile": {
+                    "description": "Associations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
+                        }
+                    ]
                 },
                 "coverImageId": {
                     "type": "integer"
