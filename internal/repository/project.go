@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
+	"github.com/GunarsK-portfolio/portfolio-common/utils"
 )
 
 func (r *repository) GetAllPortfolioProjects(ctx context.Context) ([]models.PortfolioProject, error) {
@@ -13,6 +14,12 @@ func (r *repository) GetAllPortfolioProjects(ctx context.Context) ([]models.Port
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all portfolio projects: %w", err)
 	}
+
+	// Populate file URLs using helper
+	for i := range projects {
+		utils.PopulateFileURL(projects[i].ImageFile, r.filesAPIURL)
+	}
+
 	return projects, nil
 }
 
@@ -22,6 +29,10 @@ func (r *repository) GetPortfolioProjectByID(ctx context.Context, id int64) (*mo
 	if err != nil {
 		return nil, fmt.Errorf("failed to get portfolio project with id %d: %w", id, err)
 	}
+
+	// Populate file URL using helper
+	utils.PopulateFileURL(project.ImageFile, r.filesAPIURL)
+
 	return &project, nil
 }
 
