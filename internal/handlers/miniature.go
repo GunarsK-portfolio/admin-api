@@ -152,3 +152,50 @@ func (h *Handler) DeleteMiniatureProject(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// AddImageToProject godoc
+// @Summary Add image to miniature project
+// @Description Link an uploaded image file to a miniature project with optional caption
+// @Description Display order is automatically assigned based on upload order
+// @Tags Miniatures - Projects
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Miniature Project ID"
+// @Param image body object{fileId=int64,caption=string} true "Image data (fileId required, caption optional)"
+// @Success 201 {object} models.MiniatureFile
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /miniatures/projects/{id}/images [post]
+func (h *Handler) AddImageToProject(c *gin.Context) {
+	projectID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid project id")
+		return
+	}
+
+	var req struct {
+		FileID  int64  `json:"fileId" binding:"required"`
+		Caption string `json:"caption"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	miniatureFile := &models.MiniatureFile{
+		MiniatureProjectID: projectID,
+		FileID:             req.FileID,
+		Caption:            req.Caption,
+	}
+
+	if err := h.repo.AddImageToProject(c.Request.Context(), miniatureFile); err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to add image to project")
+		return
+	}
+
+	c.JSON(http.StatusCreated, miniatureFile)
+}

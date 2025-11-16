@@ -43,6 +43,7 @@ type Repository interface {
 	CreateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error
 	UpdateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error
 	DeleteMiniatureProject(ctx context.Context, id int64) error
+	AddImageToProject(ctx context.Context, miniatureFile *models.MiniatureFile) error
 
 	// Miniature Paints
 	GetAllMiniaturePaints(ctx context.Context) ([]models.MiniaturePaint, error)

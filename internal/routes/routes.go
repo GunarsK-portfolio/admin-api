@@ -98,8 +98,7 @@ func Setup(router *gin.Engine, handler *handlers.Handler, cfg *config.Config, me
 			miniatures.GET("/projects/:id", handler.GetMiniatureProjectByID)
 			miniatures.PUT("/projects/:id", handler.UpdateMiniatureProject)
 			miniatures.DELETE("/projects/:id", handler.DeleteMiniatureProject)
-			// TODO: Add miniatures.GET("/projects/:id/images", handler.GetMiniatureProjectImages)
-			// TODO: Add miniatures.POST("/projects/:id/images", handler.AddMiniatureProjectImage)
+			miniatures.POST("/projects/:id/images", handler.AddImageToProject)
 
 			// Miniature Paints
 			miniatures.GET("/paints", handler.GetAllMiniaturePaints)
