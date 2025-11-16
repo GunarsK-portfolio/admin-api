@@ -114,9 +114,10 @@ definitions:
     type: object
   github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTheme:
     properties:
-      coverImage:
-        description: Computed fields
-        type: string
+      coverImageFile:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
+        description: Associations
       coverImageId:
         type: integer
       createdAt:
@@ -380,9 +381,10 @@ definitions:
     type: object
   github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme:
     properties:
-      coverImage:
-        description: Computed fields
-        type: string
+      coverImageFile:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
+        description: Associations
       coverImageId:
         type: integer
       createdAt:
