@@ -87,3 +87,39 @@ func (r *repository) UpdateMiniatureProject(ctx context.Context, project *models
 func (r *repository) DeleteMiniatureProject(ctx context.Context, id int64) error {
 	return checkRowsAffected(r.db.WithContext(ctx).Delete(&models.MiniatureProject{}, id))
 }
+
+// AddImageToProject links an uploaded file to a miniature project
+// Display order is auto-assigned based on the current maximum order + 1
+func (r *repository) AddImageToProject(ctx context.Context, miniatureFile *models.MiniatureFile) error {
+	// First verify the project exists
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&models.MiniatureProject{}).
+		Where("id = ?", miniatureFile.MiniatureProjectID).Count(&count).Error; err != nil {
+		return fmt.Errorf("failed to verify project: %w", err)
+	}
+	if count == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	// Auto-assign display order (get max + 1)
+	var maxOrder int
+	r.db.WithContext(ctx).Model(&models.MiniatureFile{}).
+		Where("miniature_project_id = ?", miniatureFile.MiniatureProjectID).
+		Select("COALESCE(MAX(display_order), -1)").
+		Scan(&maxOrder)
+	miniatureFile.DisplayOrder = maxOrder + 1
+
+	// Create the miniature_files record
+	err := r.db.WithContext(ctx).Omit("ID", "CreatedAt").Create(miniatureFile).Error
+	if err != nil {
+		return fmt.Errorf("failed to add image to project: %w", err)
+	}
+
+	// Reload with file data
+	err = r.db.WithContext(ctx).Preload("File").First(miniatureFile, miniatureFile.ID).Error
+	if err != nil {
+		return fmt.Errorf("failed to reload image data: %w", err)
+	}
+
+	return nil
+}

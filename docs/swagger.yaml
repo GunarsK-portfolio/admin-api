@@ -25,6 +25,23 @@ definitions:
     - issuer
     - name
     type: object
+  github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureFile:
+    properties:
+      caption:
+        type: string
+      createdAt:
+        type: string
+      displayOrder:
+        type: integer
+      file:
+        $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
+      fileId:
+        type: integer
+      id:
+        type: integer
+      miniatureProjectId:
+        type: integer
+    type: object
   github_com_GunarsK-portfolio_admin-api_internal_models.MiniaturePaint:
     properties:
       colorHex:
@@ -480,6 +497,18 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Delete miniature image
@@ -896,6 +925,67 @@ paths:
       security:
       - BearerAuth: []
       summary: Update miniature project
+      tags:
+      - Miniatures - Projects
+  /miniatures/projects/{id}/images:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Link an uploaded image file to a miniature project with optional caption
+        Display order is automatically assigned based on upload order
+      parameters:
+      - description: Miniature Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Image data (fileId required, caption optional)
+        in: body
+        name: image
+        required: true
+        schema:
+          properties:
+            caption:
+              type: string
+            fileId:
+              format: int64
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureFile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add image to miniature project
       tags:
       - Miniatures - Projects
   /miniatures/themes:

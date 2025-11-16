@@ -20,6 +20,7 @@ import (
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
 // @Router /files/{id} [delete]
 func (h *Handler) DeleteImage(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
