@@ -1,8 +1,12 @@
 package routes
 
 import (
+	"log"
+
+	"github.com/GunarsK-portfolio/admin-api/docs"
 	"github.com/GunarsK-portfolio/admin-api/internal/config"
 	"github.com/GunarsK-portfolio/admin-api/internal/handlers"
+	"github.com/GunarsK-portfolio/portfolio-common/jwt"
 	"github.com/GunarsK-portfolio/portfolio-common/metrics"
 	common "github.com/GunarsK-portfolio/portfolio-common/middleware"
 	"github.com/gin-gonic/gin"
@@ -27,8 +31,12 @@ func Setup(router *gin.Engine, handler *handlers.Handler, cfg *config.Config, me
 	// Metrics
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	// Protected API routes
-	authMiddleware := common.NewAuthMiddleware(cfg.AuthServiceURL)
+	// Protected API routes - JWT validation
+	jwtService, err := jwt.NewValidatorOnly(cfg.JWTSecret)
+	if err != nil {
+		log.Fatalf("Failed to create JWT service: %v", err)
+	}
+	authMiddleware := common.NewAuthMiddleware(jwtService)
 	v1 := router.Group("/api/v1")
 	v1.Use(authMiddleware.ValidateToken())
 	v1.Use(authMiddleware.AddTTLHeader()) // Add TTL header to all responses
@@ -112,6 +120,9 @@ func Setup(router *gin.Engine, handler *handlers.Handler, cfg *config.Config, me
 		v1.DELETE("/files/:id", handler.DeleteImage)
 	}
 
-	// Swagger documentation
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Swagger documentation (only if SWAGGER_HOST is configured)
+	if cfg.SwaggerHost != "" {
+		docs.SwaggerInfo.Host = cfg.SwaggerHost
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 }
