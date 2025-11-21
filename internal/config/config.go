@@ -11,15 +11,15 @@ import (
 type Config struct {
 	common.DatabaseConfig
 	common.ServiceConfig
-	AuthServiceURL string `validate:"required,url"`
-	FilesAPIURL    string `validate:"required,url"`
+	JWTSecret   string `validate:"required,min=32"`
+	FilesAPIURL string `validate:"required,url"`
 }
 
 func Load() *Config {
 	cfg := &Config{
 		DatabaseConfig: common.NewDatabaseConfig(),
 		ServiceConfig:  common.NewServiceConfig("8083"),
-		AuthServiceURL: common.GetEnvRequired("AUTH_SERVICE_URL"),
+		JWTSecret:      common.GetEnvRequired("JWT_SECRET"),
 		FilesAPIURL:    common.GetEnvRequired("FILES_API_URL"),
 	}
 
