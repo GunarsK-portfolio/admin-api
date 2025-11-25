@@ -22,24 +22,27 @@ go tool cover -html=coverage.out -o coverage.html
 go test -v -run TestGetAllCertifications_Success ./internal/handlers/
 
 # Run all Certification tests
-go test -v -run TestCertification ./internal/handlers/
+go test -v -run Certification ./internal/handlers/
 
 # Run all Skill tests
-go test -v -run TestSkill ./internal/handlers/
+go test -v -run Skill ./internal/handlers/
+
+# Run all Work Experience tests
+go test -v -run WorkExperience ./internal/handlers/
 ```
 
 ## Test Files
 
-**`handler_test.go`** - 50 tests
+**`handler_test.go`** - 58 tests
 
 | Category | Tests | Coverage |
 |----------|-------|----------|
-| Certifications | 13 | GetAll, GetByID, Create, Update, Delete + errors |
-| Skills | 10 | GetAll, GetByID, Create, Update, Delete + errors |
+| Certifications | 15 | GetAll, GetByID, Create, Update, Delete + errors |
+| Skills | 17 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skill Types | 6 | GetAll, GetByID, Create, Update, Delete |
-| Work Experience | 12 | GetAll, GetByID, Create, Update, Delete + errors |
-| Context Propagation | 1 | Verifies context passed to repository |
-| ID Validation | 4 | Invalid ID format handling |
+| Work Experience | 17 | GetAll, GetByID, Create, Update, Delete + errors |
+| Context Propagation | 1 | Verifies context with sentinel value |
+| ID Validation | 1 | Table-driven invalid ID format tests |
 | Constructor | 1 | Handler initialization |
 
 ## Key Testing Patterns

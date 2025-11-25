@@ -522,13 +522,22 @@ func createTestWorkExperience() models.WorkExperience {
 	}
 }
 
-func performRequest(router *gin.Engine, method, path string, body interface{}) *httptest.ResponseRecorder {
+func performRequest(t *testing.T, router *gin.Engine, method, path string, body interface{}) *httptest.ResponseRecorder {
+	t.Helper()
+
 	var reqBody []byte
 	if body != nil {
-		reqBody, _ = json.Marshal(body)
+		b, err := json.Marshal(body)
+		if err != nil {
+			t.Fatalf("failed to marshal request body: %v", err)
+		}
+		reqBody = b
 	}
 
-	req, _ := http.NewRequest(method, path, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest(method, path, bytes.NewBuffer(reqBody))
+	if err != nil {
+		t.Fatalf("failed to create HTTP request: %v", err)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -563,7 +572,7 @@ func TestGetAllCertifications_Success(t *testing.T) {
 		return expectedCerts, nil
 	}
 
-	w := performRequest(router, "GET", "/certifications", nil)
+	w := performRequest(t, router, "GET", "/certifications", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetAllCertifications() status = %d, want %d", w.Code, http.StatusOK)
@@ -592,7 +601,7 @@ func TestGetAllCertifications_Empty(t *testing.T) {
 		return []models.Certification{}, nil
 	}
 
-	w := performRequest(router, "GET", "/certifications", nil)
+	w := performRequest(t, router, "GET", "/certifications", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetAllCertifications() status = %d, want %d", w.Code, http.StatusOK)
@@ -617,7 +626,7 @@ func TestGetAllCertifications_RepositoryError(t *testing.T) {
 		return nil, errors.New("database connection failed")
 	}
 
-	w := performRequest(router, "GET", "/certifications", nil)
+	w := performRequest(t, router, "GET", "/certifications", nil)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("GetAllCertifications() status = %d, want %d", w.Code, http.StatusInternalServerError)
@@ -637,7 +646,7 @@ func TestGetCertificationByID_Success(t *testing.T) {
 		return &expectedCert, nil
 	}
 
-	w := performRequest(router, "GET", "/certifications/1", nil)
+	w := performRequest(t, router, "GET", "/certifications/1", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetCertificationByID() status = %d, want %d", w.Code, http.StatusOK)
@@ -662,7 +671,7 @@ func TestGetCertificationByID_NotFound(t *testing.T) {
 		return nil, gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "GET", "/certifications/999", nil)
+	w := performRequest(t, router, "GET", "/certifications/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("GetCertificationByID() status = %d, want %d", w.Code, http.StatusNotFound)
@@ -674,7 +683,7 @@ func TestGetCertificationByID_InvalidID(t *testing.T) {
 	router := setupTestRouter(t, handler)
 	router.GET("/certifications/:id", handler.GetCertificationByID)
 
-	w := performRequest(router, "GET", "/certifications/invalid", nil)
+	w := performRequest(t, router, "GET", "/certifications/invalid", nil)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("GetCertificationByID() status = %d, want %d", w.Code, http.StatusBadRequest)
@@ -697,7 +706,7 @@ func TestCreateCertification_Success(t *testing.T) {
 		"issueDate": testCertIssueDate,
 	}
 
-	w := performRequest(router, "POST", "/certifications", newCert)
+	w := performRequest(t, router, "POST", "/certifications", newCert)
 
 	if w.Code != http.StatusCreated {
 		t.Errorf("CreateCertification() status = %d, want %d", w.Code, http.StatusCreated)
@@ -720,7 +729,7 @@ func TestCreateCertification_ValidationError(t *testing.T) {
 		// missing issuer and issueDate
 	}
 
-	w := performRequest(router, "POST", "/certifications", invalidCert)
+	w := performRequest(t, router, "POST", "/certifications", invalidCert)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("CreateCertification() status = %d, want %d", w.Code, http.StatusBadRequest)
@@ -742,7 +751,7 @@ func TestCreateCertification_RepositoryError(t *testing.T) {
 		"issueDate": testCertIssueDate,
 	}
 
-	w := performRequest(router, "POST", "/certifications", newCert)
+	w := performRequest(t, router, "POST", "/certifications", newCert)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("CreateCertification() status = %d, want %d", w.Code, http.StatusInternalServerError)
@@ -764,7 +773,7 @@ func TestUpdateCertification_Success(t *testing.T) {
 		"issueDate": testCertIssueDate,
 	}
 
-	w := performRequest(router, "PUT", "/certifications/1", updateCert)
+	w := performRequest(t, router, "PUT", "/certifications/1", updateCert)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("UpdateCertification() status = %d, want %d", w.Code, http.StatusOK)
@@ -786,7 +795,7 @@ func TestUpdateCertification_NotFound(t *testing.T) {
 		"issueDate": testCertIssueDate,
 	}
 
-	w := performRequest(router, "PUT", "/certifications/999", updateCert)
+	w := performRequest(t, router, "PUT", "/certifications/999", updateCert)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("UpdateCertification() status = %d, want %d", w.Code, http.StatusNotFound)
@@ -798,7 +807,7 @@ func TestUpdateCertification_InvalidID(t *testing.T) {
 	router := setupTestRouter(t, handler)
 	router.PUT("/certifications/:id", handler.UpdateCertification)
 
-	w := performRequest(router, "PUT", "/certifications/invalid", map[string]interface{}{})
+	w := performRequest(t, router, "PUT", "/certifications/invalid", map[string]interface{}{})
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("UpdateCertification() status = %d, want %d", w.Code, http.StatusBadRequest)
@@ -814,7 +823,7 @@ func TestDeleteCertification_Success(t *testing.T) {
 		return nil
 	}
 
-	w := performRequest(router, "DELETE", "/certifications/1", nil)
+	w := performRequest(t, router, "DELETE", "/certifications/1", nil)
 
 	if w.Code != http.StatusNoContent {
 		t.Errorf("DeleteCertification() status = %d, want %d", w.Code, http.StatusNoContent)
@@ -830,7 +839,7 @@ func TestDeleteCertification_NotFound(t *testing.T) {
 		return gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "DELETE", "/certifications/999", nil)
+	w := performRequest(t, router, "DELETE", "/certifications/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("DeleteCertification() status = %d, want %d", w.Code, http.StatusNotFound)
@@ -842,7 +851,7 @@ func TestDeleteCertification_InvalidID(t *testing.T) {
 	router := setupTestRouter(t, handler)
 	router.DELETE("/certifications/:id", handler.DeleteCertification)
 
-	w := performRequest(router, "DELETE", "/certifications/invalid", nil)
+	w := performRequest(t, router, "DELETE", "/certifications/invalid", nil)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("DeleteCertification() status = %d, want %d", w.Code, http.StatusBadRequest)
@@ -863,7 +872,7 @@ func TestGetAllSkills_Success(t *testing.T) {
 		return expectedSkills, nil
 	}
 
-	w := performRequest(router, "GET", "/skills", nil)
+	w := performRequest(t, router, "GET", "/skills", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetAllSkills() status = %d, want %d", w.Code, http.StatusOK)
@@ -888,7 +897,7 @@ func TestGetAllSkills_RepositoryError(t *testing.T) {
 		return nil, errors.New("database error")
 	}
 
-	w := performRequest(router, "GET", "/skills", nil)
+	w := performRequest(t, router, "GET", "/skills", nil)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("GetAllSkills() status = %d, want %d", w.Code, http.StatusInternalServerError)
@@ -905,10 +914,35 @@ func TestGetSkillByID_Success(t *testing.T) {
 		return &expectedSkill, nil
 	}
 
-	w := performRequest(router, "GET", "/skills/1", nil)
+	w := performRequest(t, router, "GET", "/skills/1", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetSkillByID() status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var result models.Skill
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if result.Skill != expectedSkill.Skill {
+		t.Errorf("GetSkillByID() skill = %s, want %s", result.Skill, expectedSkill.Skill)
+	}
+}
+
+func TestGetSkillByID_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.GET("/skills/:id", handler.GetSkillByID)
+
+	mockRepo.getSkillByIDFunc = func(ctx context.Context, id int64) (*models.Skill, error) {
+		return nil, errors.New("database error")
+	}
+
+	w := performRequest(t, router, "GET", "/skills/1", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetSkillByID() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -921,7 +955,7 @@ func TestGetSkillByID_NotFound(t *testing.T) {
 		return nil, gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "GET", "/skills/999", nil)
+	w := performRequest(t, router, "GET", "/skills/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("GetSkillByID() status = %d, want %d", w.Code, http.StatusNotFound)
@@ -933,7 +967,7 @@ func TestGetSkillByID_InvalidID(t *testing.T) {
 	router := setupTestRouter(t, handler)
 	router.GET("/skills/:id", handler.GetSkillByID)
 
-	w := performRequest(router, "GET", "/skills/invalid", nil)
+	w := performRequest(t, router, "GET", "/skills/invalid", nil)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("GetSkillByID() status = %d, want %d", w.Code, http.StatusBadRequest)
@@ -955,7 +989,7 @@ func TestCreateSkill_Success(t *testing.T) {
 		"skillTypeId": 1,
 	}
 
-	w := performRequest(router, "POST", "/skills", newSkill)
+	w := performRequest(t, router, "POST", "/skills", newSkill)
 
 	if w.Code != http.StatusCreated {
 		t.Errorf("CreateSkill() status = %d, want %d", w.Code, http.StatusCreated)
@@ -978,10 +1012,31 @@ func TestCreateSkill_ValidationError(t *testing.T) {
 		// missing skillTypeId
 	}
 
-	w := performRequest(router, "POST", "/skills", invalidSkill)
+	w := performRequest(t, router, "POST", "/skills", invalidSkill)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("CreateSkill() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestCreateSkill_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.POST("/skills", handler.CreateSkill)
+
+	mockRepo.createSkillFunc = func(ctx context.Context, skill *models.Skill) error {
+		return errors.New("database error")
+	}
+
+	newSkill := map[string]interface{}{
+		"skill":       testSkillName,
+		"skillTypeId": 1,
+	}
+
+	w := performRequest(t, router, "POST", "/skills", newSkill)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("CreateSkill() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -999,7 +1054,7 @@ func TestUpdateSkill_Success(t *testing.T) {
 		"skillTypeId": 1,
 	}
 
-	w := performRequest(router, "PUT", "/skills/1", updateSkill)
+	w := performRequest(t, router, "PUT", "/skills/1", updateSkill)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("UpdateSkill() status = %d, want %d", w.Code, http.StatusOK)
@@ -1020,10 +1075,43 @@ func TestUpdateSkill_NotFound(t *testing.T) {
 		"skillTypeId": 1,
 	}
 
-	w := performRequest(router, "PUT", "/skills/999", updateSkill)
+	w := performRequest(t, router, "PUT", "/skills/999", updateSkill)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("UpdateSkill() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestUpdateSkill_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.PUT("/skills/:id", handler.UpdateSkill)
+
+	w := performRequest(t, router, "PUT", "/skills/invalid", map[string]interface{}{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("UpdateSkill() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUpdateSkill_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.PUT("/skills/:id", handler.UpdateSkill)
+
+	mockRepo.updateSkillFunc = func(ctx context.Context, skill *models.Skill) error {
+		return errors.New("database error")
+	}
+
+	updateSkill := map[string]interface{}{
+		"skill":       "Updated Skill",
+		"skillTypeId": 1,
+	}
+
+	w := performRequest(t, router, "PUT", "/skills/1", updateSkill)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("UpdateSkill() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -1036,7 +1124,7 @@ func TestDeleteSkill_Success(t *testing.T) {
 		return nil
 	}
 
-	w := performRequest(router, "DELETE", "/skills/1", nil)
+	w := performRequest(t, router, "DELETE", "/skills/1", nil)
 
 	if w.Code != http.StatusNoContent {
 		t.Errorf("DeleteSkill() status = %d, want %d", w.Code, http.StatusNoContent)
@@ -1052,10 +1140,38 @@ func TestDeleteSkill_NotFound(t *testing.T) {
 		return gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "DELETE", "/skills/999", nil)
+	w := performRequest(t, router, "DELETE", "/skills/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("DeleteSkill() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestDeleteSkill_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.DELETE("/skills/:id", handler.DeleteSkill)
+
+	w := performRequest(t, router, "DELETE", "/skills/invalid", nil)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("DeleteSkill() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestDeleteSkill_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.DELETE("/skills/:id", handler.DeleteSkill)
+
+	mockRepo.deleteSkillFunc = func(ctx context.Context, id int64) error {
+		return errors.New("database error")
+	}
+
+	w := performRequest(t, router, "DELETE", "/skills/1", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("DeleteSkill() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -1073,7 +1189,7 @@ func TestGetAllSkillTypes_Success(t *testing.T) {
 		return expectedSkillTypes, nil
 	}
 
-	w := performRequest(router, "GET", "/skill-types", nil)
+	w := performRequest(t, router, "GET", "/skill-types", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetAllSkillTypes() status = %d, want %d", w.Code, http.StatusOK)
@@ -1090,10 +1206,19 @@ func TestGetSkillTypeByID_Success(t *testing.T) {
 		return &expectedSkillType, nil
 	}
 
-	w := performRequest(router, "GET", "/skill-types/1", nil)
+	w := performRequest(t, router, "GET", "/skill-types/1", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetSkillTypeByID() status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var result models.SkillType
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if result.Name != expectedSkillType.Name {
+		t.Errorf("GetSkillTypeByID() name = %s, want %s", result.Name, expectedSkillType.Name)
 	}
 }
 
@@ -1106,7 +1231,7 @@ func TestGetSkillTypeByID_NotFound(t *testing.T) {
 		return nil, gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "GET", "/skill-types/999", nil)
+	w := performRequest(t, router, "GET", "/skill-types/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("GetSkillTypeByID() status = %d, want %d", w.Code, http.StatusNotFound)
@@ -1127,7 +1252,7 @@ func TestCreateSkillType_Success(t *testing.T) {
 		"name": testSkillTypeName,
 	}
 
-	w := performRequest(router, "POST", "/skill-types", newSkillType)
+	w := performRequest(t, router, "POST", "/skill-types", newSkillType)
 
 	if w.Code != http.StatusCreated {
 		t.Errorf("CreateSkillType() status = %d, want %d", w.Code, http.StatusCreated)
@@ -1147,7 +1272,7 @@ func TestUpdateSkillType_Success(t *testing.T) {
 		"name": "Updated Skill Type",
 	}
 
-	w := performRequest(router, "PUT", "/skill-types/1", updateSkillType)
+	w := performRequest(t, router, "PUT", "/skill-types/1", updateSkillType)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("UpdateSkillType() status = %d, want %d", w.Code, http.StatusOK)
@@ -1163,7 +1288,7 @@ func TestDeleteSkillType_Success(t *testing.T) {
 		return nil
 	}
 
-	w := performRequest(router, "DELETE", "/skill-types/1", nil)
+	w := performRequest(t, router, "DELETE", "/skill-types/1", nil)
 
 	if w.Code != http.StatusNoContent {
 		t.Errorf("DeleteSkillType() status = %d, want %d", w.Code, http.StatusNoContent)
@@ -1184,7 +1309,7 @@ func TestGetAllWorkExperience_Success(t *testing.T) {
 		return expectedExps, nil
 	}
 
-	w := performRequest(router, "GET", "/work-experience", nil)
+	w := performRequest(t, router, "GET", "/work-experience", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetAllWorkExperience() status = %d, want %d", w.Code, http.StatusOK)
@@ -1200,7 +1325,7 @@ func TestGetAllWorkExperience_RepositoryError(t *testing.T) {
 		return nil, errors.New("database error")
 	}
 
-	w := performRequest(router, "GET", "/work-experience", nil)
+	w := performRequest(t, router, "GET", "/work-experience", nil)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("GetAllWorkExperience() status = %d, want %d", w.Code, http.StatusInternalServerError)
@@ -1217,10 +1342,35 @@ func TestGetWorkExperienceByID_Success(t *testing.T) {
 		return &expectedExp, nil
 	}
 
-	w := performRequest(router, "GET", "/work-experience/1", nil)
+	w := performRequest(t, router, "GET", "/work-experience/1", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("GetWorkExperienceByID() status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var result models.WorkExperience
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if result.Company != expectedExp.Company {
+		t.Errorf("GetWorkExperienceByID() company = %s, want %s", result.Company, expectedExp.Company)
+	}
+}
+
+func TestGetWorkExperienceByID_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.GET("/work-experience/:id", handler.GetWorkExperienceByID)
+
+	mockRepo.getWorkExperienceByIDFunc = func(ctx context.Context, id int64) (*models.WorkExperience, error) {
+		return nil, errors.New("database error")
+	}
+
+	w := performRequest(t, router, "GET", "/work-experience/1", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetWorkExperienceByID() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -1233,7 +1383,7 @@ func TestGetWorkExperienceByID_NotFound(t *testing.T) {
 		return nil, gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "GET", "/work-experience/999", nil)
+	w := performRequest(t, router, "GET", "/work-experience/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("GetWorkExperienceByID() status = %d, want %d", w.Code, http.StatusNotFound)
@@ -1245,7 +1395,7 @@ func TestGetWorkExperienceByID_InvalidID(t *testing.T) {
 	router := setupTestRouter(t, handler)
 	router.GET("/work-experience/:id", handler.GetWorkExperienceByID)
 
-	w := performRequest(router, "GET", "/work-experience/invalid", nil)
+	w := performRequest(t, router, "GET", "/work-experience/invalid", nil)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("GetWorkExperienceByID() status = %d, want %d", w.Code, http.StatusBadRequest)
@@ -1268,7 +1418,7 @@ func TestCreateWorkExperience_Success(t *testing.T) {
 		"startDate": testStartDate,
 	}
 
-	w := performRequest(router, "POST", "/work-experience", newExp)
+	w := performRequest(t, router, "POST", "/work-experience", newExp)
 
 	if w.Code != http.StatusCreated {
 		t.Errorf("CreateWorkExperience() status = %d, want %d", w.Code, http.StatusCreated)
@@ -1291,10 +1441,32 @@ func TestCreateWorkExperience_ValidationError(t *testing.T) {
 		// missing position and startDate
 	}
 
-	w := performRequest(router, "POST", "/work-experience", invalidExp)
+	w := performRequest(t, router, "POST", "/work-experience", invalidExp)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("CreateWorkExperience() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestCreateWorkExperience_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.POST("/work-experience", handler.CreateWorkExperience)
+
+	mockRepo.createWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
+		return errors.New("database error")
+	}
+
+	newExp := map[string]interface{}{
+		"company":   testCompanyName,
+		"position":  testPosition,
+		"startDate": testStartDate,
+	}
+
+	w := performRequest(t, router, "POST", "/work-experience", newExp)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("CreateWorkExperience() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -1313,7 +1485,7 @@ func TestUpdateWorkExperience_Success(t *testing.T) {
 		"startDate": testStartDate,
 	}
 
-	w := performRequest(router, "PUT", "/work-experience/1", updateExp)
+	w := performRequest(t, router, "PUT", "/work-experience/1", updateExp)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("UpdateWorkExperience() status = %d, want %d", w.Code, http.StatusOK)
@@ -1335,10 +1507,44 @@ func TestUpdateWorkExperience_NotFound(t *testing.T) {
 		"startDate": testStartDate,
 	}
 
-	w := performRequest(router, "PUT", "/work-experience/999", updateExp)
+	w := performRequest(t, router, "PUT", "/work-experience/999", updateExp)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("UpdateWorkExperience() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestUpdateWorkExperience_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.PUT("/work-experience/:id", handler.UpdateWorkExperience)
+
+	w := performRequest(t, router, "PUT", "/work-experience/invalid", map[string]interface{}{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("UpdateWorkExperience() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestUpdateWorkExperience_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.PUT("/work-experience/:id", handler.UpdateWorkExperience)
+
+	mockRepo.updateWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
+		return errors.New("database error")
+	}
+
+	updateExp := map[string]interface{}{
+		"company":   "Updated Company",
+		"position":  testPosition,
+		"startDate": testStartDate,
+	}
+
+	w := performRequest(t, router, "PUT", "/work-experience/1", updateExp)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("UpdateWorkExperience() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -1351,7 +1557,7 @@ func TestDeleteWorkExperience_Success(t *testing.T) {
 		return nil
 	}
 
-	w := performRequest(router, "DELETE", "/work-experience/1", nil)
+	w := performRequest(t, router, "DELETE", "/work-experience/1", nil)
 
 	if w.Code != http.StatusNoContent {
 		t.Errorf("DeleteWorkExperience() status = %d, want %d", w.Code, http.StatusNoContent)
@@ -1367,10 +1573,38 @@ func TestDeleteWorkExperience_NotFound(t *testing.T) {
 		return gorm.ErrRecordNotFound
 	}
 
-	w := performRequest(router, "DELETE", "/work-experience/999", nil)
+	w := performRequest(t, router, "DELETE", "/work-experience/999", nil)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("DeleteWorkExperience() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestDeleteWorkExperience_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.DELETE("/work-experience/:id", handler.DeleteWorkExperience)
+
+	w := performRequest(t, router, "DELETE", "/work-experience/invalid", nil)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("DeleteWorkExperience() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestDeleteWorkExperience_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t, handler)
+	router.DELETE("/work-experience/:id", handler.DeleteWorkExperience)
+
+	mockRepo.deleteWorkExperienceFunc = func(ctx context.Context, id int64) error {
+		return errors.New("database error")
+	}
+
+	w := performRequest(t, router, "DELETE", "/work-experience/1", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("DeleteWorkExperience() status = %d, want %d", w.Code, http.StatusInternalServerError)
 	}
 }
 
@@ -1378,9 +1612,21 @@ func TestDeleteWorkExperience_NotFound(t *testing.T) {
 // Context Propagation Tests
 // =============================================================================
 
+type ctxKey struct{}
+
 func TestContextPropagation(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+
+	// Add middleware that injects a sentinel value into the context
+	router.Use(func(c *gin.Context) {
+		ctx := context.WithValue(c.Request.Context(), ctxKey{}, "test-marker")
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	})
+
 	router.GET("/certifications", handler.GetAllCertifications)
 
 	var receivedCtx context.Context
@@ -1389,7 +1635,7 @@ func TestContextPropagation(t *testing.T) {
 		return []models.Certification{}, nil
 	}
 
-	w := performRequest(router, "GET", "/certifications", nil)
+	w := performRequest(t, router, "GET", "/certifications", nil)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Request failed with status %d", w.Code)
@@ -1397,6 +1643,11 @@ func TestContextPropagation(t *testing.T) {
 
 	if receivedCtx == nil {
 		t.Error("Context was not propagated to repository")
+	}
+
+	// Verify the sentinel value was propagated through
+	if receivedCtx.Value(ctxKey{}) != "test-marker" {
+		t.Error("Context sentinel value was not propagated to repository")
 	}
 }
 
@@ -1427,7 +1678,7 @@ func TestInvalidIDFormats(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := performRequest(router, "GET", tt.path+tt.invalidID, nil)
+			w := performRequest(t, router, "GET", tt.path+tt.invalidID, nil)
 
 			if w.Code != http.StatusBadRequest {
 				t.Errorf("%s: status = %d, want %d", tt.name, w.Code, http.StatusBadRequest)
