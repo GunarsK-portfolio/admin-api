@@ -466,7 +466,7 @@ func setupTestHandler(t *testing.T) (*Handler, *mockRepository) {
 	return handler, mockRepo
 }
 
-func setupTestRouter(t *testing.T, handler *Handler) *gin.Engine {
+func setupTestRouter(t *testing.T) *gin.Engine {
 	t.Helper()
 
 	router := gin.New()
@@ -564,7 +564,7 @@ func TestNewHandler(t *testing.T) {
 
 func TestGetAllCertifications_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/certifications", handler.GetAllCertifications)
 
 	expectedCerts := []models.Certification{createTestCertification()}
@@ -594,7 +594,7 @@ func TestGetAllCertifications_Success(t *testing.T) {
 
 func TestGetAllCertifications_Empty(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/certifications", handler.GetAllCertifications)
 
 	mockRepo.getAllCertificationsFunc = func(ctx context.Context) ([]models.Certification, error) {
@@ -619,7 +619,7 @@ func TestGetAllCertifications_Empty(t *testing.T) {
 
 func TestGetAllCertifications_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/certifications", handler.GetAllCertifications)
 
 	mockRepo.getAllCertificationsFunc = func(ctx context.Context) ([]models.Certification, error) {
@@ -635,7 +635,7 @@ func TestGetAllCertifications_RepositoryError(t *testing.T) {
 
 func TestGetCertificationByID_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/certifications/:id", handler.GetCertificationByID)
 
 	expectedCert := createTestCertification()
@@ -664,7 +664,7 @@ func TestGetCertificationByID_Success(t *testing.T) {
 
 func TestGetCertificationByID_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/certifications/:id", handler.GetCertificationByID)
 
 	mockRepo.getCertificationByIDFunc = func(ctx context.Context, id int64) (*models.Certification, error) {
@@ -680,7 +680,7 @@ func TestGetCertificationByID_NotFound(t *testing.T) {
 
 func TestGetCertificationByID_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/certifications/:id", handler.GetCertificationByID)
 
 	w := performRequest(t, router, "GET", "/certifications/invalid", nil)
@@ -690,9 +690,25 @@ func TestGetCertificationByID_InvalidID(t *testing.T) {
 	}
 }
 
+func TestGetCertificationByID_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/certifications/:id", handler.GetCertificationByID)
+
+	mockRepo.getCertificationByIDFunc = func(ctx context.Context, id int64) (*models.Certification, error) {
+		return nil, errors.New("database error")
+	}
+
+	w := performRequest(t, router, "GET", "/certifications/1", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetCertificationByID() status = %d, want %d", w.Code, http.StatusInternalServerError)
+	}
+}
+
 func TestCreateCertification_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/certifications", handler.CreateCertification)
 
 	mockRepo.createCertificationFunc = func(ctx context.Context, cert *models.Certification) error {
@@ -720,7 +736,7 @@ func TestCreateCertification_Success(t *testing.T) {
 
 func TestCreateCertification_ValidationError(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/certifications", handler.CreateCertification)
 
 	// Missing required fields
@@ -738,7 +754,7 @@ func TestCreateCertification_ValidationError(t *testing.T) {
 
 func TestCreateCertification_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/certifications", handler.CreateCertification)
 
 	mockRepo.createCertificationFunc = func(ctx context.Context, cert *models.Certification) error {
@@ -760,7 +776,7 @@ func TestCreateCertification_RepositoryError(t *testing.T) {
 
 func TestUpdateCertification_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/certifications/:id", handler.UpdateCertification)
 
 	mockRepo.updateCertificationFunc = func(ctx context.Context, cert *models.Certification) error {
@@ -782,7 +798,7 @@ func TestUpdateCertification_Success(t *testing.T) {
 
 func TestUpdateCertification_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/certifications/:id", handler.UpdateCertification)
 
 	mockRepo.updateCertificationFunc = func(ctx context.Context, cert *models.Certification) error {
@@ -804,7 +820,7 @@ func TestUpdateCertification_NotFound(t *testing.T) {
 
 func TestUpdateCertification_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/certifications/:id", handler.UpdateCertification)
 
 	w := performRequest(t, router, "PUT", "/certifications/invalid", map[string]interface{}{})
@@ -816,7 +832,7 @@ func TestUpdateCertification_InvalidID(t *testing.T) {
 
 func TestDeleteCertification_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/certifications/:id", handler.DeleteCertification)
 
 	mockRepo.deleteCertificationFunc = func(ctx context.Context, id int64) error {
@@ -832,7 +848,7 @@ func TestDeleteCertification_Success(t *testing.T) {
 
 func TestDeleteCertification_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/certifications/:id", handler.DeleteCertification)
 
 	mockRepo.deleteCertificationFunc = func(ctx context.Context, id int64) error {
@@ -848,7 +864,7 @@ func TestDeleteCertification_NotFound(t *testing.T) {
 
 func TestDeleteCertification_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/certifications/:id", handler.DeleteCertification)
 
 	w := performRequest(t, router, "DELETE", "/certifications/invalid", nil)
@@ -864,7 +880,7 @@ func TestDeleteCertification_InvalidID(t *testing.T) {
 
 func TestGetAllSkills_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skills", handler.GetAllSkills)
 
 	expectedSkills := []models.Skill{createTestSkill()}
@@ -890,7 +906,7 @@ func TestGetAllSkills_Success(t *testing.T) {
 
 func TestGetAllSkills_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skills", handler.GetAllSkills)
 
 	mockRepo.getAllSkillsFunc = func(ctx context.Context) ([]models.Skill, error) {
@@ -906,7 +922,7 @@ func TestGetAllSkills_RepositoryError(t *testing.T) {
 
 func TestGetSkillByID_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skills/:id", handler.GetSkillByID)
 
 	expectedSkill := createTestSkill()
@@ -932,7 +948,7 @@ func TestGetSkillByID_Success(t *testing.T) {
 
 func TestGetSkillByID_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skills/:id", handler.GetSkillByID)
 
 	mockRepo.getSkillByIDFunc = func(ctx context.Context, id int64) (*models.Skill, error) {
@@ -948,7 +964,7 @@ func TestGetSkillByID_RepositoryError(t *testing.T) {
 
 func TestGetSkillByID_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skills/:id", handler.GetSkillByID)
 
 	mockRepo.getSkillByIDFunc = func(ctx context.Context, id int64) (*models.Skill, error) {
@@ -964,7 +980,7 @@ func TestGetSkillByID_NotFound(t *testing.T) {
 
 func TestGetSkillByID_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skills/:id", handler.GetSkillByID)
 
 	w := performRequest(t, router, "GET", "/skills/invalid", nil)
@@ -976,7 +992,7 @@ func TestGetSkillByID_InvalidID(t *testing.T) {
 
 func TestCreateSkill_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/skills", handler.CreateSkill)
 
 	mockRepo.createSkillFunc = func(ctx context.Context, skill *models.Skill) error {
@@ -1003,7 +1019,7 @@ func TestCreateSkill_Success(t *testing.T) {
 
 func TestCreateSkill_ValidationError(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/skills", handler.CreateSkill)
 
 	// Missing required fields
@@ -1021,7 +1037,7 @@ func TestCreateSkill_ValidationError(t *testing.T) {
 
 func TestCreateSkill_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/skills", handler.CreateSkill)
 
 	mockRepo.createSkillFunc = func(ctx context.Context, skill *models.Skill) error {
@@ -1042,7 +1058,7 @@ func TestCreateSkill_RepositoryError(t *testing.T) {
 
 func TestUpdateSkill_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/skills/:id", handler.UpdateSkill)
 
 	mockRepo.updateSkillFunc = func(ctx context.Context, skill *models.Skill) error {
@@ -1063,7 +1079,7 @@ func TestUpdateSkill_Success(t *testing.T) {
 
 func TestUpdateSkill_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/skills/:id", handler.UpdateSkill)
 
 	mockRepo.updateSkillFunc = func(ctx context.Context, skill *models.Skill) error {
@@ -1084,7 +1100,7 @@ func TestUpdateSkill_NotFound(t *testing.T) {
 
 func TestUpdateSkill_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/skills/:id", handler.UpdateSkill)
 
 	w := performRequest(t, router, "PUT", "/skills/invalid", map[string]interface{}{})
@@ -1096,7 +1112,7 @@ func TestUpdateSkill_InvalidID(t *testing.T) {
 
 func TestUpdateSkill_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/skills/:id", handler.UpdateSkill)
 
 	mockRepo.updateSkillFunc = func(ctx context.Context, skill *models.Skill) error {
@@ -1117,7 +1133,7 @@ func TestUpdateSkill_RepositoryError(t *testing.T) {
 
 func TestDeleteSkill_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/skills/:id", handler.DeleteSkill)
 
 	mockRepo.deleteSkillFunc = func(ctx context.Context, id int64) error {
@@ -1133,7 +1149,7 @@ func TestDeleteSkill_Success(t *testing.T) {
 
 func TestDeleteSkill_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/skills/:id", handler.DeleteSkill)
 
 	mockRepo.deleteSkillFunc = func(ctx context.Context, id int64) error {
@@ -1149,7 +1165,7 @@ func TestDeleteSkill_NotFound(t *testing.T) {
 
 func TestDeleteSkill_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/skills/:id", handler.DeleteSkill)
 
 	w := performRequest(t, router, "DELETE", "/skills/invalid", nil)
@@ -1161,7 +1177,7 @@ func TestDeleteSkill_InvalidID(t *testing.T) {
 
 func TestDeleteSkill_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/skills/:id", handler.DeleteSkill)
 
 	mockRepo.deleteSkillFunc = func(ctx context.Context, id int64) error {
@@ -1181,7 +1197,7 @@ func TestDeleteSkill_RepositoryError(t *testing.T) {
 
 func TestGetAllSkillTypes_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skill-types", handler.GetAllSkillTypes)
 
 	expectedSkillTypes := []models.SkillType{createTestSkillType()}
@@ -1198,7 +1214,7 @@ func TestGetAllSkillTypes_Success(t *testing.T) {
 
 func TestGetSkillTypeByID_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skill-types/:id", handler.GetSkillTypeByID)
 
 	expectedSkillType := createTestSkillType()
@@ -1224,7 +1240,7 @@ func TestGetSkillTypeByID_Success(t *testing.T) {
 
 func TestGetSkillTypeByID_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/skill-types/:id", handler.GetSkillTypeByID)
 
 	mockRepo.getSkillTypeByIDFunc = func(ctx context.Context, id int64) (*models.SkillType, error) {
@@ -1240,7 +1256,7 @@ func TestGetSkillTypeByID_NotFound(t *testing.T) {
 
 func TestCreateSkillType_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/skill-types", handler.CreateSkillType)
 
 	mockRepo.createSkillTypeFunc = func(ctx context.Context, skillType *models.SkillType) error {
@@ -1261,7 +1277,7 @@ func TestCreateSkillType_Success(t *testing.T) {
 
 func TestUpdateSkillType_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/skill-types/:id", handler.UpdateSkillType)
 
 	mockRepo.updateSkillTypeFunc = func(ctx context.Context, skillType *models.SkillType) error {
@@ -1281,7 +1297,7 @@ func TestUpdateSkillType_Success(t *testing.T) {
 
 func TestDeleteSkillType_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/skill-types/:id", handler.DeleteSkillType)
 
 	mockRepo.deleteSkillTypeFunc = func(ctx context.Context, id int64) error {
@@ -1301,7 +1317,7 @@ func TestDeleteSkillType_Success(t *testing.T) {
 
 func TestGetAllWorkExperience_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/work-experience", handler.GetAllWorkExperience)
 
 	expectedExps := []models.WorkExperience{createTestWorkExperience()}
@@ -1318,7 +1334,7 @@ func TestGetAllWorkExperience_Success(t *testing.T) {
 
 func TestGetAllWorkExperience_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/work-experience", handler.GetAllWorkExperience)
 
 	mockRepo.getAllWorkExperienceFunc = func(ctx context.Context) ([]models.WorkExperience, error) {
@@ -1334,7 +1350,7 @@ func TestGetAllWorkExperience_RepositoryError(t *testing.T) {
 
 func TestGetWorkExperienceByID_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/work-experience/:id", handler.GetWorkExperienceByID)
 
 	expectedExp := createTestWorkExperience()
@@ -1360,7 +1376,7 @@ func TestGetWorkExperienceByID_Success(t *testing.T) {
 
 func TestGetWorkExperienceByID_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/work-experience/:id", handler.GetWorkExperienceByID)
 
 	mockRepo.getWorkExperienceByIDFunc = func(ctx context.Context, id int64) (*models.WorkExperience, error) {
@@ -1376,7 +1392,7 @@ func TestGetWorkExperienceByID_RepositoryError(t *testing.T) {
 
 func TestGetWorkExperienceByID_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/work-experience/:id", handler.GetWorkExperienceByID)
 
 	mockRepo.getWorkExperienceByIDFunc = func(ctx context.Context, id int64) (*models.WorkExperience, error) {
@@ -1392,7 +1408,7 @@ func TestGetWorkExperienceByID_NotFound(t *testing.T) {
 
 func TestGetWorkExperienceByID_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.GET("/work-experience/:id", handler.GetWorkExperienceByID)
 
 	w := performRequest(t, router, "GET", "/work-experience/invalid", nil)
@@ -1404,7 +1420,7 @@ func TestGetWorkExperienceByID_InvalidID(t *testing.T) {
 
 func TestCreateWorkExperience_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/work-experience", handler.CreateWorkExperience)
 
 	mockRepo.createWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
@@ -1432,7 +1448,7 @@ func TestCreateWorkExperience_Success(t *testing.T) {
 
 func TestCreateWorkExperience_ValidationError(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/work-experience", handler.CreateWorkExperience)
 
 	// Missing required fields
@@ -1450,7 +1466,7 @@ func TestCreateWorkExperience_ValidationError(t *testing.T) {
 
 func TestCreateWorkExperience_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.POST("/work-experience", handler.CreateWorkExperience)
 
 	mockRepo.createWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
@@ -1472,7 +1488,7 @@ func TestCreateWorkExperience_RepositoryError(t *testing.T) {
 
 func TestUpdateWorkExperience_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/work-experience/:id", handler.UpdateWorkExperience)
 
 	mockRepo.updateWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
@@ -1494,7 +1510,7 @@ func TestUpdateWorkExperience_Success(t *testing.T) {
 
 func TestUpdateWorkExperience_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/work-experience/:id", handler.UpdateWorkExperience)
 
 	mockRepo.updateWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
@@ -1516,7 +1532,7 @@ func TestUpdateWorkExperience_NotFound(t *testing.T) {
 
 func TestUpdateWorkExperience_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/work-experience/:id", handler.UpdateWorkExperience)
 
 	w := performRequest(t, router, "PUT", "/work-experience/invalid", map[string]interface{}{})
@@ -1528,7 +1544,7 @@ func TestUpdateWorkExperience_InvalidID(t *testing.T) {
 
 func TestUpdateWorkExperience_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.PUT("/work-experience/:id", handler.UpdateWorkExperience)
 
 	mockRepo.updateWorkExperienceFunc = func(ctx context.Context, exp *models.WorkExperience) error {
@@ -1550,7 +1566,7 @@ func TestUpdateWorkExperience_RepositoryError(t *testing.T) {
 
 func TestDeleteWorkExperience_Success(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/work-experience/:id", handler.DeleteWorkExperience)
 
 	mockRepo.deleteWorkExperienceFunc = func(ctx context.Context, id int64) error {
@@ -1566,7 +1582,7 @@ func TestDeleteWorkExperience_Success(t *testing.T) {
 
 func TestDeleteWorkExperience_NotFound(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/work-experience/:id", handler.DeleteWorkExperience)
 
 	mockRepo.deleteWorkExperienceFunc = func(ctx context.Context, id int64) error {
@@ -1582,7 +1598,7 @@ func TestDeleteWorkExperience_NotFound(t *testing.T) {
 
 func TestDeleteWorkExperience_InvalidID(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/work-experience/:id", handler.DeleteWorkExperience)
 
 	w := performRequest(t, router, "DELETE", "/work-experience/invalid", nil)
@@ -1594,7 +1610,7 @@ func TestDeleteWorkExperience_InvalidID(t *testing.T) {
 
 func TestDeleteWorkExperience_RepositoryError(t *testing.T) {
 	handler, mockRepo := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 	router.DELETE("/work-experience/:id", handler.DeleteWorkExperience)
 
 	mockRepo.deleteWorkExperienceFunc = func(ctx context.Context, id int64) error {
@@ -1657,7 +1673,7 @@ func TestContextPropagation(t *testing.T) {
 
 func TestInvalidIDFormats(t *testing.T) {
 	handler, _ := setupTestHandler(t)
-	router := setupTestRouter(t, handler)
+	router := setupTestRouter(t)
 
 	router.GET("/certifications/:id", handler.GetCertificationByID)
 	router.GET("/skills/:id", handler.GetSkillByID)

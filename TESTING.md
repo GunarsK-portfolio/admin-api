@@ -33,11 +33,11 @@ go test -v -run WorkExperience ./internal/handlers/
 
 ## Test Files
 
-**`handler_test.go`** - 58 tests
+**`handler_test.go`** - 59 tests
 
 | Category | Tests | Coverage |
 |----------|-------|----------|
-| Certifications | 15 | GetAll, GetByID, Create, Update, Delete + errors |
+| Certifications | 16 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skills | 17 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skill Types | 6 | GetAll, GetByID, Create, Update, Delete |
 | Work Experience | 17 | GetAll, GetByID, Create, Update, Delete + errors |
