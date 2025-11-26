@@ -8,13 +8,14 @@ on:
 env:
   PYTHON_VERSION: '3.12'
   # Service URLs - single source of truth
-  # Use direct container ports (bypass Traefik) to avoid HTTPS redirect issues in CI
-  AUTH_SERVICE_URL: http://localhost:8084
-  ADMIN_API_URL: http://localhost:8083
-  PUBLIC_API_URL: http://localhost:8082
-  FILES_API_URL: http://localhost:8085
-  ADMIN_WEB_URL: http://localhost:8081
-  PUBLIC_WEB_URL: http://localhost:8080
+  # Use Traefik HTTPS ports (same as production routing)
+  # Playwright configured with ignoreHTTPSErrors for self-signed certs
+  AUTH_SERVICE_URL: https://localhost:8443/auth/v1
+  ADMIN_API_URL: https://localhost:8443/admin-api/v1
+  PUBLIC_API_URL: https://localhost/api/v1
+  FILES_API_URL: https://localhost:8443/files-api/v1
+  ADMIN_WEB_URL: https://localhost:8443
+  PUBLIC_WEB_URL: https://localhost
 
 jobs:
   e2e:
@@ -42,11 +43,18 @@ jobs:
           path: e2e-tests
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Checkout other services
+      - name: Checkout backend services
         uses: actions/checkout@v6
         with:
           repository: ${{ github.repository_owner }}/auth-service
           path: auth-service
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout admin-web
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository_owner }}/admin-web
+          path: admin-web
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout files-api
@@ -61,13 +69,6 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/public-api
           path: public-api
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout admin-web
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ github.repository_owner }}/admin-web
-          path: admin-web
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout public-web
@@ -109,16 +110,7 @@ jobs:
         working-directory: infrastructure
         run: |
           cp .env.example .env
-          # Update CORS to allow direct container ports (bypassing Traefik)
-          echo "ALLOWED_ORIGINS_ADMIN=https://localhost:8443,http://localhost:81,http://localhost:8081" >> .env
-          echo "ALLOWED_ORIGINS_AUTH=https://localhost:8443,http://localhost:81,http://localhost:8081" >> .env
-          echo "ALLOWED_ORIGINS_FILES=https://localhost:8443,https://localhost,http://localhost:81,http://localhost:80,http://localhost:8081,http://localhost:8080" >> .env
-          echo "ALLOWED_ORIGINS_PUBLIC=https://localhost,http://localhost:80,http://localhost:8080" >> .env
-          # Configure frontend to use direct container ports (bypass Traefik for CI)
-          echo "VITE_ADMIN_API_URL=http://localhost:8083/api/v1" >> .env
-          echo "VITE_ADMIN_AUTH_URL=http://localhost:8084/api/v1/auth" >> .env
-          echo "VITE_ADMIN_FILES_API_URL=http://localhost:8085/api/v1" >> .env
-          echo "VITE_PUBLIC_API_URL=http://localhost:8082/api/v1" >> .env
+          # Use default HTTPS URLs from .env.example (Traefik routing)
 
       - name: Start infrastructure
         working-directory: infrastructure
@@ -130,12 +122,12 @@ jobs:
         run: |
           echo "Starting parallel health checks..."
           timeout 120 bash -c 'until docker exec postgres pg_isready -U postgres; do sleep 2; done' &
-          timeout 120 bash -c 'until curl -sf ${{ env.AUTH_SERVICE_URL }}/health; do sleep 2; done' &
-          timeout 120 bash -c 'until curl -sf ${{ env.ADMIN_API_URL }}/health; do sleep 2; done' &
-          timeout 120 bash -c 'until curl -sf ${{ env.PUBLIC_API_URL }}/health; do sleep 2; done' &
-          timeout 120 bash -c 'until curl -sf ${{ env.FILES_API_URL }}/health; do sleep 2; done' &
-          timeout 120 bash -c 'until curl -sf ${{ env.ADMIN_WEB_URL }}/; do sleep 2; done' &
-          timeout 120 bash -c 'until curl -sf ${{ env.PUBLIC_WEB_URL }}/; do sleep 2; done' &
+          timeout 120 bash -c 'until curl -skf ${{ env.AUTH_SERVICE_URL }}/health; do sleep 2; done' &
+          timeout 120 bash -c 'until curl -skf ${{ env.ADMIN_API_URL }}/health; do sleep 2; done' &
+          timeout 120 bash -c 'until curl -skf ${{ env.PUBLIC_API_URL }}/health; do sleep 2; done' &
+          timeout 120 bash -c 'until curl -skf ${{ env.FILES_API_URL }}/health; do sleep 2; done' &
+          timeout 120 bash -c 'until curl -skf ${{ env.ADMIN_WEB_URL }}/; do sleep 2; done' &
+          timeout 120 bash -c 'until curl -skf ${{ env.PUBLIC_WEB_URL }}/; do sleep 2; done' &
           wait
           echo "All services are healthy!"
 
@@ -152,6 +144,7 @@ jobs:
           echo "TEST_HEADLESS=true" >> .env
           echo "TEST_TIMEOUT=300000" >> .env
           echo "TEST_BROWSER=chromium" >> .env
+          echo "TEST_IGNORE_HTTPS_ERRORS=true" >> .env
 
       - name: Run E2E tests
         working-directory: e2e-tests
