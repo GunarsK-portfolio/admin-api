@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -13,6 +12,7 @@ import (
 	commondb "github.com/GunarsK-portfolio/portfolio-common/database"
 	"github.com/GunarsK-portfolio/portfolio-common/logger"
 	"github.com/GunarsK-portfolio/portfolio-common/metrics"
+	"github.com/GunarsK-portfolio/portfolio-common/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -68,8 +68,10 @@ func main() {
 	routes.Setup(router, handler, cfg, metricsCollector)
 
 	appLogger.Info("Admin API ready", "port", cfg.ServiceConfig.Port, "environment", os.Getenv("ENVIRONMENT"))
-	if err := router.Run(fmt.Sprintf(":%s", cfg.ServiceConfig.Port)); err != nil {
-		appLogger.Error("Failed to start server", "error", err)
-		log.Fatal("Failed to start server:", err)
+
+	serverCfg := server.DefaultConfig(cfg.ServiceConfig.Port)
+	if err := server.Run(router, serverCfg, appLogger); err != nil {
+		appLogger.Error("Server error", "error", err)
+		log.Fatal("Server error:", err)
 	}
 }
