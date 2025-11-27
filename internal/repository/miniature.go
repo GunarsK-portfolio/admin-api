@@ -26,7 +26,7 @@ func (r *repository) GetAllMiniatureProjects(ctx context.Context) ([]models.Mini
 
 	// Convert MiniatureFiles to Images for frontend
 	for i := range projects {
-		projects[i].Images = r.convertMiniatureFilesToImages(projects[i].MiniatureFiles)
+		projects[i].Images = utils.ConvertMiniatureFilesToImages(projects[i].MiniatureFiles, r.filesAPIURL)
 	}
 
 	return projects, nil
@@ -47,24 +47,9 @@ func (r *repository) GetMiniatureProjectByID(ctx context.Context, id int64) (*mo
 	}
 
 	// Convert MiniatureFiles to Images for frontend
-	project.Images = r.convertMiniatureFilesToImages(project.MiniatureFiles)
+	project.Images = utils.ConvertMiniatureFilesToImages(project.MiniatureFiles, r.filesAPIURL)
 
 	return &project, nil
-}
-
-// Helper function to convert MiniatureFiles to simplified Images for frontend
-func (r *repository) convertMiniatureFilesToImages(files []models.MiniatureFile) []models.Image {
-	images := make([]models.Image, 0, len(files))
-	for _, file := range files {
-		if file.File != nil {
-			images = append(images, models.Image{
-				ID:      file.ID,
-				URL:     utils.BuildFileURL(r.filesAPIURL, file.File.FileType, file.File.S3Key),
-				Caption: file.Caption,
-			})
-		}
-	}
-	return images
 }
 
 func (r *repository) CreateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error {
