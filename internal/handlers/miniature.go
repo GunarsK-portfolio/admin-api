@@ -59,14 +59,21 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 	c.JSON(http.StatusOK, project)
 }
 
+// miniatureProjectRequest is the request body for create/update miniature project
+type miniatureProjectRequest struct {
+	models.MiniatureProject
+	TechniqueIDs []int64 `json:"techniqueIds,omitempty"`
+	PaintIDs     []int64 `json:"paintIds,omitempty"`
+}
+
 // CreateMiniatureProject godoc
 // @Summary Create miniature project
-// @Description Create a new miniature painting project
+// @Description Create a new miniature painting project with optional techniques and paints
 // @Tags Miniatures - Projects
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param project body models.MiniatureProject true "Miniature project data"
+// @Param project body miniatureProjectRequest true "Miniature project data with optional techniqueIds and paintIds"
 // @Success 201 {object} models.MiniatureProject
 // @Header 201 {string} Location "URL of the created resource"
 // @Failure 400 {object} map[string]string
@@ -74,14 +81,37 @@ func (h *Handler) GetMiniatureProjectByID(c *gin.Context) {
 // @Failure 401 {object} map[string]string
 // @Router /miniatures/projects [post]
 func (h *Handler) CreateMiniatureProject(c *gin.Context) {
-	var project models.MiniatureProject
-	if err := c.ShouldBindJSON(&project); err != nil {
+	var req miniatureProjectRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.repo.CreateMiniatureProject(c.Request.Context(), &project); err != nil {
+	ctx := c.Request.Context()
+
+	if err := h.repo.CreateMiniatureProject(ctx, &req.MiniatureProject); err != nil {
 		commonHandlers.HandleRepositoryError(c, err, "", "failed to create miniature project")
+		return
+	}
+
+	// Set techniques and paints if provided
+	if len(req.TechniqueIDs) > 0 {
+		if err := h.repo.SetProjectTechniques(ctx, req.ID, req.TechniqueIDs); err != nil {
+			commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to set techniques")
+			return
+		}
+	}
+	if len(req.PaintIDs) > 0 {
+		if err := h.repo.SetProjectPaints(ctx, req.ID, req.PaintIDs); err != nil {
+			commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to set paints")
+			return
+		}
+	}
+
+	// Reload project with all associations
+	project, err := h.repo.GetMiniatureProjectByID(ctx, req.ID)
+	if err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to fetch created project")
 		return
 	}
 
@@ -91,13 +121,13 @@ func (h *Handler) CreateMiniatureProject(c *gin.Context) {
 
 // UpdateMiniatureProject godoc
 // @Summary Update miniature project
-// @Description Update an existing miniature project
+// @Description Update an existing miniature project with optional techniques and paints
 // @Tags Miniatures - Projects
 // @Accept json
 // @Produce json
 // @Security BearerAuth
 // @Param id path int true "Miniature Project ID"
-// @Param project body models.MiniatureProject true "Miniature project data"
+// @Param project body miniatureProjectRequest true "Miniature project data with optional techniqueIds and paintIds"
 // @Success 200 {object} models.MiniatureProject
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -110,15 +140,34 @@ func (h *Handler) UpdateMiniatureProject(c *gin.Context) {
 		return
 	}
 
-	var project models.MiniatureProject
-	if err := c.ShouldBindJSON(&project); err != nil {
+	var req miniatureProjectRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	project.ID = id
-	if err := h.repo.UpdateMiniatureProject(c.Request.Context(), &project); err != nil {
+	ctx := c.Request.Context()
+	req.ID = id
+
+	if err := h.repo.UpdateMiniatureProject(ctx, &req.MiniatureProject); err != nil {
 		commonHandlers.HandleRepositoryError(c, err, "miniature project not found", "failed to update miniature project")
+		return
+	}
+
+	// Update techniques and paints (always replace, even with empty arrays)
+	if err := h.repo.SetProjectTechniques(ctx, id, req.TechniqueIDs); err != nil {
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to set techniques")
+		return
+	}
+	if err := h.repo.SetProjectPaints(ctx, id, req.PaintIDs); err != nil {
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to set paints")
+		return
+	}
+
+	// Reload project with all associations
+	project, err := h.repo.GetMiniatureProjectByID(ctx, id)
+	if err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to fetch updated project")
 		return
 	}
 
@@ -198,4 +247,109 @@ func (h *Handler) AddImageToProject(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, miniatureFile)
+}
+
+// SetProjectTechniques godoc
+// @Summary Set techniques for a miniature project
+// @Description Replace all techniques for a project with the provided list
+// @Tags Miniatures - Projects
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Miniature Project ID"
+// @Param techniques body object{techniqueIds=[]int64} true "List of technique IDs"
+// @Success 200 {object} models.MiniatureProject
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /miniatures/projects/{id}/techniques [put]
+func (h *Handler) SetProjectTechniques(c *gin.Context) {
+	projectID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid project id")
+		return
+	}
+
+	var req struct {
+		TechniqueIDs []int64 `json:"techniqueIds"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.repo.SetProjectTechniques(c.Request.Context(), projectID, req.TechniqueIDs); err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to set techniques")
+		return
+	}
+
+	// Return updated project
+	project, err := h.repo.GetMiniatureProjectByID(c.Request.Context(), projectID)
+	if err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to fetch project")
+		return
+	}
+	c.JSON(http.StatusOK, project)
+}
+
+// SetProjectPaints godoc
+// @Summary Set paints for a miniature project
+// @Description Replace all paints for a project with the provided list
+// @Tags Miniatures - Projects
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Miniature Project ID"
+// @Param paints body object{paintIds=[]int64} true "List of paint IDs"
+// @Success 200 {object} models.MiniatureProject
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /miniatures/projects/{id}/paints [put]
+func (h *Handler) SetProjectPaints(c *gin.Context) {
+	projectID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		commonHandlers.RespondError(c, http.StatusBadRequest, "invalid project id")
+		return
+	}
+
+	var req struct {
+		PaintIDs []int64 `json:"paintIds"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		commonHandlers.RespondError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.repo.SetProjectPaints(c.Request.Context(), projectID, req.PaintIDs); err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to set paints")
+		return
+	}
+
+	// Return updated project
+	project, err := h.repo.GetMiniatureProjectByID(c.Request.Context(), projectID)
+	if err != nil {
+		commonHandlers.HandleRepositoryError(c, err, "project not found", "failed to fetch project")
+		return
+	}
+	c.JSON(http.StatusOK, project)
+}
+
+// GetAllTechniques godoc
+// @Summary Get all techniques
+// @Description Get all painting techniques from the classifier table
+// @Tags Miniatures - Techniques
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.MiniatureTechnique
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /miniatures/techniques [get]
+func (h *Handler) GetAllTechniques(c *gin.Context) {
+	techniques, err := h.repo.GetAllTechniques(c.Request.Context())
+	if err != nil {
+		commonHandlers.LogAndRespondError(c, http.StatusInternalServerError, err, "failed to fetch techniques")
+		return
+	}
+	c.JSON(http.StatusOK, techniques)
 }

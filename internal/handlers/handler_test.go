@@ -73,6 +73,11 @@ type mockRepository struct {
 	updateMiniatureProjectFunc  func(ctx context.Context, project *models.MiniatureProject) error
 	deleteMiniatureProjectFunc  func(ctx context.Context, id int64) error
 	addImageToProjectFunc       func(ctx context.Context, miniatureFile *models.MiniatureFile) error
+	setProjectTechniquesFunc    func(ctx context.Context, projectID int64, techniqueIDs []int64) error
+	setProjectPaintsFunc        func(ctx context.Context, projectID int64, paintIDs []int64) error
+
+	// Miniature Techniques
+	getAllTechniquesFunc func(ctx context.Context) ([]models.MiniatureTechnique, error)
 
 	// Miniature Paints
 	getAllMiniaturePaintsFunc func(ctx context.Context) ([]models.MiniaturePaint, error)
@@ -298,6 +303,28 @@ func (m *mockRepository) AddImageToProject(ctx context.Context, miniatureFile *m
 		return m.addImageToProjectFunc(ctx, miniatureFile)
 	}
 	return errors.New("not implemented")
+}
+
+func (m *mockRepository) SetProjectTechniques(ctx context.Context, projectID int64, techniqueIDs []int64) error {
+	if m.setProjectTechniquesFunc != nil {
+		return m.setProjectTechniquesFunc(ctx, projectID, techniqueIDs)
+	}
+	return nil // Default to success for tests that don't care about this
+}
+
+func (m *mockRepository) SetProjectPaints(ctx context.Context, projectID int64, paintIDs []int64) error {
+	if m.setProjectPaintsFunc != nil {
+		return m.setProjectPaintsFunc(ctx, projectID, paintIDs)
+	}
+	return nil // Default to success for tests that don't care about this
+}
+
+// Miniature Technique implementations
+func (m *mockRepository) GetAllTechniques(ctx context.Context) ([]models.MiniatureTechnique, error) {
+	if m.getAllTechniquesFunc != nil {
+		return m.getAllTechniquesFunc(ctx)
+	}
+	return nil, errors.New("not implemented")
 }
 
 // Miniature Paint implementations
@@ -1700,5 +1727,422 @@ func TestInvalidIDFormats(t *testing.T) {
 				t.Errorf("%s: status = %d, want %d", tt.name, w.Code, http.StatusBadRequest)
 			}
 		})
+	}
+}
+
+// =============================================================================
+// Miniature Project Handler Tests
+// =============================================================================
+
+func createTestMiniatureProject() models.MiniatureProject {
+	return models.MiniatureProject{
+		ID:           1,
+		Title:        "Space Marine Captain",
+		Scale:        "28mm",
+		Manufacturer: "Games Workshop",
+		Difficulty:   "Advanced",
+		DisplayOrder: 1,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+}
+
+func createTestMiniatureTechnique() models.MiniatureTechnique {
+	return models.MiniatureTechnique{
+		ID:              1,
+		Name:            "Edge Highlighting",
+		DifficultyLevel: "Intermediate",
+		DisplayOrder:    1,
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+	}
+}
+
+func TestGetAllMiniatureProjects_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/projects", handler.GetAllMiniatureProjects)
+
+	expectedProjects := []models.MiniatureProject{createTestMiniatureProject()}
+	mockRepo.getAllMiniatureProjectsFunc = func(ctx context.Context) ([]models.MiniatureProject, error) {
+		return expectedProjects, nil
+	}
+
+	w := performRequest(t, router, "GET", "/miniatures/projects", nil)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetAllMiniatureProjects() status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestGetAllMiniatureProjects_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/projects", handler.GetAllMiniatureProjects)
+
+	mockRepo.getAllMiniatureProjectsFunc = func(ctx context.Context) ([]models.MiniatureProject, error) {
+		return nil, errors.New("database error")
+	}
+
+	w := performRequest(t, router, "GET", "/miniatures/projects", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetAllMiniatureProjects() status = %d, want %d", w.Code, http.StatusInternalServerError)
+	}
+}
+
+func TestGetMiniatureProjectByID_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/projects/:id", handler.GetMiniatureProjectByID)
+
+	expectedProject := createTestMiniatureProject()
+	mockRepo.getMiniatureProjectByIDFunc = func(ctx context.Context, id int64) (*models.MiniatureProject, error) {
+		return &expectedProject, nil
+	}
+
+	w := performRequest(t, router, "GET", "/miniatures/projects/1", nil)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetMiniatureProjectByID() status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestGetMiniatureProjectByID_NotFound(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/projects/:id", handler.GetMiniatureProjectByID)
+
+	mockRepo.getMiniatureProjectByIDFunc = func(ctx context.Context, id int64) (*models.MiniatureProject, error) {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	w := performRequest(t, router, "GET", "/miniatures/projects/999", nil)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("GetMiniatureProjectByID() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestGetMiniatureProjectByID_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/projects/:id", handler.GetMiniatureProjectByID)
+
+	w := performRequest(t, router, "GET", "/miniatures/projects/invalid", nil)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("GetMiniatureProjectByID() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestCreateMiniatureProject_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.POST("/miniatures/projects", handler.CreateMiniatureProject)
+
+	mockRepo.createMiniatureProjectFunc = func(ctx context.Context, project *models.MiniatureProject) error {
+		project.ID = 1
+		return nil
+	}
+	mockRepo.getMiniatureProjectByIDFunc = func(ctx context.Context, id int64) (*models.MiniatureProject, error) {
+		return &models.MiniatureProject{ID: 1, Title: "Space Marine Captain"}, nil
+	}
+
+	newProject := map[string]interface{}{
+		"name":  "Space Marine Captain",
+		"scale": "28mm",
+	}
+
+	w := performRequest(t, router, "POST", "/miniatures/projects", newProject)
+
+	if w.Code != http.StatusCreated {
+		t.Errorf("CreateMiniatureProject() status = %d, want %d", w.Code, http.StatusCreated)
+	}
+}
+
+func TestCreateMiniatureProject_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.POST("/miniatures/projects", handler.CreateMiniatureProject)
+
+	mockRepo.createMiniatureProjectFunc = func(ctx context.Context, project *models.MiniatureProject) error {
+		return errors.New("database error")
+	}
+
+	newProject := map[string]interface{}{
+		"name":  "Space Marine Captain",
+		"scale": "28mm",
+	}
+
+	w := performRequest(t, router, "POST", "/miniatures/projects", newProject)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("CreateMiniatureProject() status = %d, want %d", w.Code, http.StatusInternalServerError)
+	}
+}
+
+func TestUpdateMiniatureProject_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id", handler.UpdateMiniatureProject)
+
+	mockRepo.updateMiniatureProjectFunc = func(ctx context.Context, project *models.MiniatureProject) error {
+		return nil
+	}
+	mockRepo.getMiniatureProjectByIDFunc = func(ctx context.Context, id int64) (*models.MiniatureProject, error) {
+		return &models.MiniatureProject{ID: 1, Title: "Updated Captain"}, nil
+	}
+
+	updateProject := map[string]interface{}{
+		"name":  "Updated Captain",
+		"scale": "28mm",
+	}
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/1", updateProject)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("UpdateMiniatureProject() status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestUpdateMiniatureProject_NotFound(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id", handler.UpdateMiniatureProject)
+
+	mockRepo.updateMiniatureProjectFunc = func(ctx context.Context, project *models.MiniatureProject) error {
+		return gorm.ErrRecordNotFound
+	}
+
+	updateProject := map[string]interface{}{
+		"name": "Updated Captain",
+	}
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/999", updateProject)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("UpdateMiniatureProject() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestUpdateMiniatureProject_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id", handler.UpdateMiniatureProject)
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/invalid", map[string]interface{}{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("UpdateMiniatureProject() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestDeleteMiniatureProject_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.DELETE("/miniatures/projects/:id", handler.DeleteMiniatureProject)
+
+	mockRepo.deleteMiniatureProjectFunc = func(ctx context.Context, id int64) error {
+		return nil
+	}
+
+	w := performRequest(t, router, "DELETE", "/miniatures/projects/1", nil)
+
+	if w.Code != http.StatusNoContent {
+		t.Errorf("DeleteMiniatureProject() status = %d, want %d", w.Code, http.StatusNoContent)
+	}
+}
+
+func TestDeleteMiniatureProject_NotFound(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.DELETE("/miniatures/projects/:id", handler.DeleteMiniatureProject)
+
+	mockRepo.deleteMiniatureProjectFunc = func(ctx context.Context, id int64) error {
+		return gorm.ErrRecordNotFound
+	}
+
+	w := performRequest(t, router, "DELETE", "/miniatures/projects/999", nil)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("DeleteMiniatureProject() status = %d, want %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func TestDeleteMiniatureProject_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.DELETE("/miniatures/projects/:id", handler.DeleteMiniatureProject)
+
+	w := performRequest(t, router, "DELETE", "/miniatures/projects/invalid", nil)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("DeleteMiniatureProject() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+// =============================================================================
+// Miniature Technique Handler Tests
+// =============================================================================
+
+func TestGetAllTechniques_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/techniques", handler.GetAllTechniques)
+
+	expectedTechniques := []models.MiniatureTechnique{createTestMiniatureTechnique()}
+	mockRepo.getAllTechniquesFunc = func(ctx context.Context) ([]models.MiniatureTechnique, error) {
+		return expectedTechniques, nil
+	}
+
+	w := performRequest(t, router, "GET", "/miniatures/techniques", nil)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("GetAllTechniques() status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestGetAllTechniques_RepositoryError(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.GET("/miniatures/techniques", handler.GetAllTechniques)
+
+	mockRepo.getAllTechniquesFunc = func(ctx context.Context) ([]models.MiniatureTechnique, error) {
+		return nil, errors.New("database error")
+	}
+
+	w := performRequest(t, router, "GET", "/miniatures/techniques", nil)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("GetAllTechniques() status = %d, want %d", w.Code, http.StatusInternalServerError)
+	}
+}
+
+// =============================================================================
+// Project Techniques/Paints Association Tests
+// =============================================================================
+
+func TestSetProjectTechniques_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id/techniques", handler.SetProjectTechniques)
+
+	mockRepo.setProjectTechniquesFunc = func(ctx context.Context, projectID int64, techniqueIDs []int64) error {
+		return nil
+	}
+	mockRepo.getMiniatureProjectByIDFunc = func(ctx context.Context, id int64) (*models.MiniatureProject, error) {
+		return &models.MiniatureProject{ID: 1, Title: "Test Project"}, nil
+	}
+
+	req := map[string]interface{}{
+		"techniqueIds": []int64{1, 2, 3},
+	}
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/1/techniques", req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("SetProjectTechniques() status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestSetProjectTechniques_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id/techniques", handler.SetProjectTechniques)
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/invalid/techniques", map[string]interface{}{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("SetProjectTechniques() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestSetProjectPaints_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id/paints", handler.SetProjectPaints)
+
+	mockRepo.setProjectPaintsFunc = func(ctx context.Context, projectID int64, paintIDs []int64) error {
+		return nil
+	}
+	mockRepo.getMiniatureProjectByIDFunc = func(ctx context.Context, id int64) (*models.MiniatureProject, error) {
+		return &models.MiniatureProject{ID: 1, Title: "Test Project"}, nil
+	}
+
+	req := map[string]interface{}{
+		"paintIds": []int64{1, 2, 3},
+	}
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/1/paints", req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("SetProjectPaints() status = %d, want %d", w.Code, http.StatusOK)
+	}
+}
+
+func TestSetProjectPaints_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.PUT("/miniatures/projects/:id/paints", handler.SetProjectPaints)
+
+	w := performRequest(t, router, "PUT", "/miniatures/projects/invalid/paints", map[string]interface{}{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("SetProjectPaints() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+// =============================================================================
+// Add Image to Project Tests
+// =============================================================================
+
+func TestAddImageToProject_Success(t *testing.T) {
+	handler, mockRepo := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.POST("/miniatures/projects/:id/images", handler.AddImageToProject)
+
+	mockRepo.addImageToProjectFunc = func(ctx context.Context, miniatureFile *models.MiniatureFile) error {
+		miniatureFile.ID = 1
+		return nil
+	}
+
+	req := map[string]interface{}{
+		"fileId":  100,
+		"caption": "Front view",
+	}
+
+	w := performRequest(t, router, "POST", "/miniatures/projects/1/images", req)
+
+	if w.Code != http.StatusCreated {
+		t.Errorf("AddImageToProject() status = %d, want %d", w.Code, http.StatusCreated)
+	}
+}
+
+func TestAddImageToProject_InvalidID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.POST("/miniatures/projects/:id/images", handler.AddImageToProject)
+
+	w := performRequest(t, router, "POST", "/miniatures/projects/invalid/images", map[string]interface{}{})
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("AddImageToProject() status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestAddImageToProject_MissingFileID(t *testing.T) {
+	handler, _ := setupTestHandler(t)
+	router := setupTestRouter(t)
+	router.POST("/miniatures/projects/:id/images", handler.AddImageToProject)
+
+	req := map[string]interface{}{
+		"caption": "Front view",
+	}
+
+	w := performRequest(t, router, "POST", "/miniatures/projects/1/images", req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("AddImageToProject() status = %d, want %d", w.Code, http.StatusBadRequest)
 	}
 }
