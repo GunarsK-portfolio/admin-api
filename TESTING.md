@@ -29,11 +29,14 @@ go test -v -run Skill ./internal/handlers/
 
 # Run all Work Experience tests
 go test -v -run WorkExperience ./internal/handlers/
+
+# Run all Miniature tests
+go test -v -run Miniature ./internal/handlers/
 ```
 
 ## Test Files
 
-**`handler_test.go`** - 59 tests
+**`handler_test.go`** - 77 tests
 
 | Category | Tests | Coverage |
 |----------|-------|----------|
@@ -41,6 +44,10 @@ go test -v -run WorkExperience ./internal/handlers/
 | Skills | 17 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skill Types | 6 | GetAll, GetByID, Create, Update, Delete |
 | Work Experience | 17 | GetAll, GetByID, Create, Update, Delete + errors |
+| Miniature Projects | 11 | GetAll, GetByID, Create, Update, Delete + errors |
+| Miniature Techniques | 2 | GetAll + error |
+| Project Associations | 4 | SetTechniques, SetPaints + invalid ID |
+| Add Image to Project | 3 | Success, InvalidID, MissingFileID |
 | Context Propagation | 1 | Verifies context with sentinel value |
 | ID Validation | 1 | Table-driven invalid ID format tests |
 | Constructor | 1 | Handler initialization |
@@ -72,6 +79,8 @@ if w.Code != http.StatusOK { ... }
 cert := createTestCertification()
 skill := createTestSkill()
 exp := createTestWorkExperience()
+project := createTestMiniatureProject()
+technique := createTestMiniatureTechnique()
 ```
 
 ## Test Categories

@@ -44,6 +44,11 @@ type Repository interface {
 	UpdateMiniatureProject(ctx context.Context, project *models.MiniatureProject) error
 	DeleteMiniatureProject(ctx context.Context, id int64) error
 	AddImageToProject(ctx context.Context, miniatureFile *models.MiniatureFile) error
+	SetProjectTechniques(ctx context.Context, projectID int64, techniqueIDs []int64) error
+	SetProjectPaints(ctx context.Context, projectID int64, paintIDs []int64) error
+
+	// Miniature Techniques
+	GetAllTechniques(ctx context.Context) ([]models.MiniatureTechnique, error)
 
 	// Miniature Paints
 	GetAllMiniaturePaints(ctx context.Context) ([]models.MiniaturePaint, error)

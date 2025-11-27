@@ -107,6 +107,11 @@ func Setup(router *gin.Engine, handler *handlers.Handler, cfg *config.Config, me
 			miniatures.PUT("/projects/:id", handler.UpdateMiniatureProject)
 			miniatures.DELETE("/projects/:id", handler.DeleteMiniatureProject)
 			miniatures.POST("/projects/:id/images", handler.AddImageToProject)
+			miniatures.PUT("/projects/:id/techniques", handler.SetProjectTechniques)
+			miniatures.PUT("/projects/:id/paints", handler.SetProjectPaints)
+
+			// Miniature Techniques
+			miniatures.GET("/techniques", handler.GetAllTechniques)
 
 			// Miniature Paints
 			miniatures.GET("/paints", handler.GetAllMiniaturePaints)

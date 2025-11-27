@@ -11,20 +11,22 @@ import (
 
 func (r *repository) GetAllMiniatureProjects(ctx context.Context) ([]models.MiniatureProject, error) {
 	var projects []models.MiniatureProject
-	// Preload Theme and MiniatureFiles (with nested File from storage.files)
+	// Preload Theme, MiniatureFiles, Techniques, and Paints
 	err := r.db.WithContext(ctx).
 		Preload("Theme").
 		Preload("MiniatureFiles", func(db *gorm.DB) *gorm.DB {
-			return db.Order("miniatures.miniature_files.display_order ASC")
+			return db.Order("miniatures.miniature_files.display_order ASC, miniatures.miniature_files.id ASC")
 		}).
 		Preload("MiniatureFiles.File").
-		Order("display_order ASC").
+		Preload("Techniques.Technique").
+		Preload("Paints.Paint").
+		Order("display_order ASC, id ASC").
 		Find(&projects).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all miniature projects: %w", err)
 	}
 
-	// Convert MiniatureFiles to Images for frontend
+	// Build image URLs (requires filesAPIURL)
 	for i := range projects {
 		projects[i].Images = utils.ConvertMiniatureFilesToImages(projects[i].MiniatureFiles, r.filesAPIURL)
 	}
@@ -34,19 +36,21 @@ func (r *repository) GetAllMiniatureProjects(ctx context.Context) ([]models.Mini
 
 func (r *repository) GetMiniatureProjectByID(ctx context.Context, id int64) (*models.MiniatureProject, error) {
 	var project models.MiniatureProject
-	// Preload Theme and MiniatureFiles (with nested File from storage.files)
+	// Preload Theme, MiniatureFiles, Techniques, and Paints
 	err := r.db.WithContext(ctx).
 		Preload("Theme").
 		Preload("MiniatureFiles", func(db *gorm.DB) *gorm.DB {
-			return db.Order("miniatures.miniature_files.display_order ASC")
+			return db.Order("miniatures.miniature_files.display_order ASC, miniatures.miniature_files.id ASC")
 		}).
 		Preload("MiniatureFiles.File").
+		Preload("Techniques.Technique").
+		Preload("Paints.Paint").
 		First(&project, id).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get miniature project with id %d: %w", id, err)
 	}
 
-	// Convert MiniatureFiles to Images for frontend
+	// Build image URLs (requires filesAPIURL)
 	project.Images = utils.ConvertMiniatureFilesToImages(project.MiniatureFiles, r.filesAPIURL)
 
 	return &project, nil
@@ -107,4 +111,60 @@ func (r *repository) AddImageToProject(ctx context.Context, miniatureFile *model
 	}
 
 	return nil
+}
+
+// SetProjectTechniques replaces all techniques for a project
+func (r *repository) SetProjectTechniques(ctx context.Context, projectID int64, techniqueIDs []int64) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Delete existing techniques
+		if err := tx.Where("miniature_project_id = ?", projectID).
+			Delete(&models.MiniatureProjectTechnique{}).Error; err != nil {
+			return fmt.Errorf("failed to clear techniques: %w", err)
+		}
+
+		// Insert new techniques
+		for _, techniqueID := range techniqueIDs {
+			link := models.MiniatureProjectTechnique{
+				MiniatureProjectID: projectID,
+				TechniqueID:        techniqueID,
+			}
+			if err := tx.Omit("ID", "CreatedAt").Create(&link).Error; err != nil {
+				return fmt.Errorf("failed to add technique %d: %w", techniqueID, err)
+			}
+		}
+		return nil
+	})
+}
+
+// SetProjectPaints replaces all paints for a project
+func (r *repository) SetProjectPaints(ctx context.Context, projectID int64, paintIDs []int64) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Delete existing paints
+		if err := tx.Where("miniature_project_id = ?", projectID).
+			Delete(&models.MiniatureProjectPaint{}).Error; err != nil {
+			return fmt.Errorf("failed to clear paints: %w", err)
+		}
+
+		// Insert new paints
+		for _, paintID := range paintIDs {
+			link := models.MiniatureProjectPaint{
+				MiniatureProjectID: projectID,
+				PaintID:            paintID,
+			}
+			if err := tx.Omit("ID", "CreatedAt").Create(&link).Error; err != nil {
+				return fmt.Errorf("failed to add paint %d: %w", paintID, err)
+			}
+		}
+		return nil
+	})
+}
+
+// GetAllTechniques returns all techniques from the classifier table
+func (r *repository) GetAllTechniques(ctx context.Context) ([]models.MiniatureTechnique, error) {
+	var techniques []models.MiniatureTechnique
+	err := r.db.WithContext(ctx).Order("display_order ASC, name ASC").Find(&techniques).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get techniques: %w", err)
+	}
+	return techniques, nil
 }
