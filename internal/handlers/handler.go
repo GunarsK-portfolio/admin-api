@@ -1,11 +1,8 @@
 package handlers
 
 import (
-	"path"
-	"strconv"
-
 	"github.com/GunarsK-portfolio/admin-api/internal/repository"
-	"github.com/gin-gonic/gin"
+	commonhandlers "github.com/GunarsK-portfolio/portfolio-common/handlers"
 )
 
 type Handler struct {
@@ -16,8 +13,5 @@ func New(repo repository.Repository) *Handler {
 	return &Handler{repo: repo}
 }
 
-// setLocationHeader sets the Location header for created resources
-func setLocationHeader(c *gin.Context, id int64) {
-	location := path.Join(c.Request.URL.Path, strconv.FormatInt(id, 10))
-	c.Header("Location", location)
-}
+// setLocationHeader wraps the common helper for backward compatibility
+var setLocationHeader = commonhandlers.SetLocationHeader
