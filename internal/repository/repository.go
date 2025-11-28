@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/GunarsK-portfolio/admin-api/internal/models"
+	commonrepo "github.com/GunarsK-portfolio/portfolio-common/repository"
 	"gorm.io/gorm"
 )
 
@@ -85,58 +86,26 @@ type Repository interface {
 type repository struct {
 	db          *gorm.DB
 	filesAPIURL string
+	*commonrepo.SafeUpdater
 }
 
 func New(db *gorm.DB, filesAPIURL string) Repository {
 	return &repository{
 		db:          db,
 		filesAPIURL: filesAPIURL,
+		SafeUpdater: commonrepo.NewSafeUpdater(db),
 	}
 }
 
-// checkRowsAffected returns gorm.ErrRecordNotFound if no rows were affected
-func checkRowsAffected(result *gorm.DB) error {
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-	return nil
-}
+// checkRowsAffected wraps the common helper
+var checkRowsAffected = commonrepo.CheckRowsAffected
 
-// safeUpdate performs an update excluding system fields (ID, CreatedAt, UpdatedAt)
-// Uses Updates to avoid zero-value overwrites unlike Save
-// Checks existence first to ensure idempotent updates (no false 404s)
+// safeUpdate wraps SafeUpdater.Update for backward compatibility
 func (r *repository) safeUpdate(ctx context.Context, model interface{}, id int64) error {
-	return r.safeUpdateWithOptions(ctx, model, id, nil)
+	return r.Update(ctx, model, id)
 }
 
-// safeUpdateWithAssociations performs safe update with association handling
-// Use for models with has-many or many-to-many relationships
+// safeUpdateWithAssociations wraps SafeUpdater.UpdateWithAssociations
 func (r *repository) safeUpdateWithAssociations(ctx context.Context, model interface{}, id int64) error {
-	return r.safeUpdateWithOptions(ctx, model, id, &gorm.Session{FullSaveAssociations: true})
-}
-
-// safeUpdateWithOptions is the internal implementation
-func (r *repository) safeUpdateWithOptions(ctx context.Context, model interface{}, id int64, session *gorm.Session) error {
-	// Check existence using COUNT to avoid loading data
-	var count int64
-	if err := r.db.WithContext(ctx).Model(model).Where("id = ?", id).Count(&count).Error; err != nil {
-		return err
-	}
-	if count == 0 {
-		return gorm.ErrRecordNotFound
-	}
-
-	// Build update query
-	db := r.db.WithContext(ctx).Model(model).Where("id = ?", id)
-
-	// Apply session options if provided
-	if session != nil {
-		db = db.Session(session)
-	}
-
-	// Now perform update - RowsAffected=0 is OK (idempotent)
-	return db.Omit("ID", "CreatedAt", "UpdatedAt").Updates(model).Error
+	return r.UpdateWithAssociations(ctx, model, id)
 }
