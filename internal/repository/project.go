@@ -45,8 +45,21 @@ func (r *repository) CreatePortfolioProject(ctx context.Context, project *models
 }
 
 func (r *repository) UpdatePortfolioProject(ctx context.Context, project *models.PortfolioProject) error {
-	// Use safeUpdateWithAssociations for Technologies many-to-many relationship
-	return r.safeUpdateWithAssociations(ctx, project, project.ID)
+	// Store technologies to update separately (many-to-many needs Association.Replace)
+	technologies := project.Technologies
+	project.Technologies = nil
+
+	// Update the project fields
+	if err := r.safeUpdate(ctx, project, project.ID); err != nil {
+		return fmt.Errorf("failed to update portfolio project: %w", err)
+	}
+
+	// Replace technologies association (handles junction table correctly)
+	if err := r.db.WithContext(ctx).Model(project).Association("Technologies").Replace(technologies); err != nil {
+		return fmt.Errorf("failed to update portfolio project technologies: %w", err)
+	}
+
+	return nil
 }
 
 // DeletePortfolioProject deletes a portfolio project and automatically cascades to:
