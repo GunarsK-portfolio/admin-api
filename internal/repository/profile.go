@@ -47,6 +47,8 @@ func (r *repository) UpdateProfile(ctx context.Context, profile *models.Profile)
 		"email":          profile.Email,
 		"phone":          profile.Phone,
 		"location":       profile.Location,
+		"github":         profile.Github,
+		"linkedin":       profile.Linkedin,
 		"avatar_file_id": profile.AvatarFileID,
 		"resume_file_id": profile.ResumeFileID,
 	}).Error
