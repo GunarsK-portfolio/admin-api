@@ -2,7 +2,8 @@
 
 ![CI](https://github.com/GunarsK-portfolio/admin-api/workflows/CI/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GunarsK-portfolio/admin-api)](https://goreportcard.com/report/github.com/GunarsK-portfolio/admin-api)
-[![codecov](https://codecov.io/gh/GunarsK-portfolio/admin-api/branch/main/graph/badge.svg)](https://codecov.io/gh/GunarsK-portfolio/admin-api)
+[![codecov](https://codecov.io/gh/GunarsK-portfolio/admin-api/graph/badge.svg?token=PISWS6LDK4)](https://codecov.io/gh/GunarsK-portfolio/admin-api)
+[![CodeRabbit](https://img.shields.io/coderabbit/prs/github/GunarsK-portfolio/admin-api?label=CodeRabbit&color=2ea44f)](https://coderabbit.ai)
 
 RESTful API for managing portfolio content with authentication.
 
@@ -265,4 +266,4 @@ This API is consumed by the admin-web frontend for portfolio content management.
 
 ## License
 
-MIT
+[MIT](LICENSE)

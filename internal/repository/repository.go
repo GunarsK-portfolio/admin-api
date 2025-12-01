@@ -104,8 +104,3 @@ var checkRowsAffected = commonrepo.CheckRowsAffected
 func (r *repository) safeUpdate(ctx context.Context, model interface{}, id int64) error {
 	return r.Update(ctx, model, id)
 }
-
-// safeUpdateWithAssociations wraps SafeUpdater.UpdateWithAssociations
-func (r *repository) safeUpdateWithAssociations(ctx context.Context, model interface{}, id int64) error {
-	return r.UpdateWithAssociations(ctx, model, id)
-}
