@@ -82,6 +82,8 @@ definitions:
       id:
         type: integer
       images:
+        description: Computed field (populated by repository layer - requires URL
+          building)
         items:
           $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image'
         type: array
@@ -91,13 +93,13 @@ definitions:
         type: string
       paints:
         items:
-          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint'
         type: array
       scale:
         type: string
       techniques:
         items:
-          type: string
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique'
         type: array
       theme:
         allOf:
@@ -107,6 +109,25 @@ definitions:
         type: integer
       timeSpent:
         type: number
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTechnique:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      difficultyLevel:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
       updatedAt:
         type: string
     required:
@@ -201,17 +222,19 @@ definitions:
   github_com_GunarsK-portfolio_admin-api_internal_models.Profile:
     properties:
       avatarFile:
-        allOf:
-        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
-        description: Now exposed to JSON
+        $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
       avatarFileId:
         type: integer
       createdAt:
         type: string
       email:
         type: string
+      github:
+        type: string
       id:
         type: integer
+      linkedin:
+        type: string
       location:
         type: string
       name:
@@ -219,9 +242,7 @@ definitions:
       phone:
         type: string
       resumeFile:
-        allOf:
-        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
-        description: Now exposed to JSON
+        $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile'
       resumeFileId:
         type: integer
       tagline:
@@ -349,6 +370,8 @@ definitions:
       id:
         type: integer
       images:
+        description: Computed field (populated by repository layer - requires URL
+          building)
         items:
           $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image'
         type: array
@@ -358,13 +381,13 @@ definitions:
         type: string
       paints:
         items:
-          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint'
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint'
         type: array
       scale:
         type: string
       techniques:
         items:
-          type: string
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique'
         type: array
       theme:
         allOf:
@@ -374,6 +397,59 @@ definitions:
         type: integer
       timeSpent:
         type: number
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      miniatureProjectId:
+        type: integer
+      notes:
+        type: string
+      paint:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint'
+        description: Associations
+      paintId:
+        type: integer
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      miniatureProjectId:
+        type: integer
+      notes:
+        type: string
+      technique:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTechnique'
+        description: Associations
+      techniqueId:
+        type: integer
+    type: object
+  github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTechnique:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      difficultyLevel:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
       updatedAt:
         type: string
     required:
@@ -465,6 +541,61 @@ definitions:
       url:
         description: Computed field
         type: string
+    type: object
+  internal_handlers.miniatureProjectRequest:
+    properties:
+      completedDate:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      difficulty:
+        type: string
+      displayOrder:
+        type: integer
+      id:
+        type: integer
+      images:
+        description: Computed field (populated by repository layer - requires URL
+          building)
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image'
+        type: array
+      manufacturer:
+        type: string
+      name:
+        type: string
+      paintIds:
+        items:
+          type: integer
+        type: array
+      paints:
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint'
+        type: array
+      scale:
+        type: string
+      techniqueIds:
+        items:
+          type: integer
+        type: array
+      techniques:
+        items:
+          $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique'
+        type: array
+      theme:
+        allOf:
+        - $ref: '#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme'
+        description: Associations
+      themeId:
+        type: integer
+      timeSpent:
+        type: number
+      updatedAt:
+        type: string
+    required:
+    - name
     type: object
 host: localhost:8083
 info:
@@ -759,14 +890,15 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new miniature painting project
+      description: Create a new miniature painting project with optional techniques
+        and paints
       parameters:
-      - description: Miniature project data
+      - description: Miniature project data with optional techniqueIds and paintIds
         in: body
         name: project
         required: true
         schema:
-          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
+          $ref: '#/definitions/internal_handlers.miniatureProjectRequest'
       produces:
       - application/json
       responses:
@@ -886,19 +1018,20 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update an existing miniature project
+      description: Update an existing miniature project with optional techniques and
+        paints
       parameters:
       - description: Miniature Project ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Miniature project data
+      - description: Miniature project data with optional techniqueIds and paintIds
         in: body
         name: project
         required: true
         schema:
-          $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
+          $ref: '#/definitions/internal_handlers.miniatureProjectRequest'
       produces:
       - application/json
       responses:
@@ -990,6 +1123,141 @@ paths:
       summary: Add image to miniature project
       tags:
       - Miniatures - Projects
+  /miniatures/projects/{id}/paints:
+    put:
+      consumes:
+      - application/json
+      description: Replace all paints for a project with the provided list
+      parameters:
+      - description: Miniature Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: List of paint IDs
+        in: body
+        name: paints
+        required: true
+        schema:
+          properties:
+            paintIds:
+              items:
+                format: int64
+                type: integer
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Set paints for a miniature project
+      tags:
+      - Miniatures - Projects
+  /miniatures/projects/{id}/techniques:
+    put:
+      consumes:
+      - application/json
+      description: Replace all techniques for a project with the provided list
+      parameters:
+      - description: Miniature Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: List of technique IDs
+        in: body
+        name: techniques
+        required: true
+        schema:
+          properties:
+            techniqueIds:
+              items:
+                format: int64
+                type: integer
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Set techniques for a miniature project
+      tags:
+      - Miniatures - Projects
+  /miniatures/techniques:
+    get:
+      description: Get all painting techniques from the classifier table
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTechnique'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all techniques
+      tags:
+      - Miniatures - Techniques
   /miniatures/themes:
     get:
       description: Get all miniature painting themes

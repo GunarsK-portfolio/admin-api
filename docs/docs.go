@@ -458,7 +458,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new miniature painting project",
+                "description": "Create a new miniature painting project with optional techniques and paints",
                 "consumes": [
                     "application/json"
                 ],
@@ -471,12 +471,12 @@ const docTemplate = `{
                 "summary": "Create miniature project",
                 "parameters": [
                     {
-                        "description": "Miniature project data",
+                        "description": "Miniature project data with optional techniqueIds and paintIds",
                         "name": "project",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
+                            "$ref": "#/definitions/internal_handlers.miniatureProjectRequest"
                         }
                     }
                 ],
@@ -598,7 +598,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update an existing miniature project",
+                "description": "Update an existing miniature project with optional techniques and paints",
                 "consumes": [
                     "application/json"
                 ],
@@ -618,12 +618,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Miniature project data",
+                        "description": "Miniature project data with optional techniqueIds and paintIds",
                         "name": "project",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
+                            "$ref": "#/definitions/internal_handlers.miniatureProjectRequest"
                         }
                     }
                 ],
@@ -789,6 +789,216 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/miniatures/projects/{id}/paints": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Replace all paints for a project with the provided list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Projects"
+                ],
+                "summary": "Set paints for a miniature project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Miniature Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "List of paint IDs",
+                        "name": "paints",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "paintIds": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer",
+                                        "format": "int64"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/miniatures/projects/{id}/techniques": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Replace all techniques for a project with the provided list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Projects"
+                ],
+                "summary": "Set techniques for a miniature project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Miniature Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "List of technique IDs",
+                        "name": "techniques",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "techniqueIds": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "integer",
+                                        "format": "int64"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureProject"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/miniatures/techniques": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all painting techniques from the classifier table",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Miniatures - Techniques"
+                ],
+                "summary": "Get all techniques",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTechnique"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -3081,6 +3291,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "images": {
+                    "description": "Computed field (populated by repository layer - requires URL building)",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image"
@@ -3095,7 +3306,7 @@ const docTemplate = `{
                 "paints": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint"
                     }
                 },
                 "scale": {
@@ -3104,7 +3315,7 @@ const docTemplate = `{
                 "techniques": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique"
                     }
                 },
                 "theme": {
@@ -3120,6 +3331,35 @@ const docTemplate = `{
                 },
                 "timeSpent": {
                     "type": "number"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_admin-api_internal_models.MiniatureTechnique": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "difficultyLevel": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -3267,12 +3507,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "avatarFile": {
-                    "description": "Now exposed to JSON",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
-                        }
-                    ]
+                    "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
                 },
                 "avatarFileId": {
                     "type": "integer"
@@ -3283,8 +3518,14 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "github": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "linkedin": {
+                    "type": "string"
                 },
                 "location": {
                     "type": "string"
@@ -3296,12 +3537,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "resumeFile": {
-                    "description": "Now exposed to JSON",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
-                        }
-                    ]
+                    "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.StorageFile"
                 },
                 "resumeFileId": {
                     "type": "integer"
@@ -3488,6 +3724,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "images": {
+                    "description": "Computed field (populated by repository layer - requires URL building)",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image"
@@ -3502,7 +3739,7 @@ const docTemplate = `{
                 "paints": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint"
                     }
                 },
                 "scale": {
@@ -3511,7 +3748,7 @@ const docTemplate = `{
                 "techniques": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique"
                     }
                 },
                 "theme": {
@@ -3527,6 +3764,91 @@ const docTemplate = `{
                 },
                 "timeSpent": {
                     "type": "number"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "miniatureProjectId": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "paint": {
+                    "description": "Associations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniaturePaint"
+                        }
+                    ]
+                },
+                "paintId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "miniatureProjectId": {
+                    "type": "integer"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "technique": {
+                    "description": "Associations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTechnique"
+                        }
+                    ]
+                },
+                "techniqueId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTechnique": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "difficultyLevel": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -3662,6 +3984,89 @@ const docTemplate = `{
                 },
                 "url": {
                     "description": "Computed field",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handlers.miniatureProjectRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "completedDate": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "difficulty": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "images": {
+                    "description": "Computed field (populated by repository layer - requires URL building)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.Image"
+                    }
+                },
+                "manufacturer": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "paintIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "paints": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectPaint"
+                    }
+                },
+                "scale": {
+                    "type": "string"
+                },
+                "techniqueIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "techniques": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureProjectTechnique"
+                    }
+                },
+                "theme": {
+                    "description": "Associations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_GunarsK-portfolio_portfolio-common_models.MiniatureTheme"
+                        }
+                    ]
+                },
+                "themeId": {
+                    "type": "integer"
+                },
+                "timeSpent": {
+                    "type": "number"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
