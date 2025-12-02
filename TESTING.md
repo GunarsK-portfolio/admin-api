@@ -36,15 +36,15 @@ go test -v -run Miniature ./internal/handlers/
 
 ## Test Files
 
-**`handler_test.go`** - 77 tests
+**`handler_test.go`** - 83 tests
 
 | Category | Tests | Coverage |
 |----------|-------|----------|
 | Certifications | 16 | GetAll, GetByID, Create, Update, Delete + errors |
-| Skills | 17 | GetAll, GetByID, Create, Update, Delete + errors |
+| Skills | 18 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skill Types | 6 | GetAll, GetByID, Create, Update, Delete |
-| Work Experience | 17 | GetAll, GetByID, Create, Update, Delete + errors |
-| Miniature Projects | 11 | GetAll, GetByID, Create, Update, Delete + errors |
+| Work Experience | 18 | GetAll, GetByID, Create, Update, Delete + errors |
+| Miniature Projects | 14 | GetAll, GetByID, Create, Update, Delete + errors |
 | Miniature Techniques | 2 | GetAll + error |
 | Project Associations | 4 | SetTechniques, SetPaints + invalid ID |
 | Add Image to Project | 3 | Success, InvalidID, MissingFileID |
