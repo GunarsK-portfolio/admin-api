@@ -39,7 +39,7 @@ go test -v -run Miniature ./internal/handlers/
 **`handler_test.go`** - 83 tests
 
 | Category | Tests | Coverage |
-|----------|-------|----------|
+| -------- | ----- | -------- |
 | Certifications | 16 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skills | 18 | GetAll, GetByID, Create, Update, Delete + errors |
 | Skill Types | 6 | GetAll, GetByID, Create, Update, Delete |
