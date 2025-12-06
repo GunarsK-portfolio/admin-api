@@ -3,20 +3,26 @@
 ## Overview
 
 The admin-api uses Go's standard `testing` package with httptest for handler
-unit tests.
+and route-level unit tests. **214 tests total** across handlers and routes.
 
 ## Quick Commands
 
 ```bash
 # Run all tests
-go test ./internal/handlers/
+go test ./...
 
 # Run with coverage
-go test -cover ./internal/handlers/
+go test -cover ./...
 
 # Generate coverage report
-go test -coverprofile=coverage.out ./internal/handlers/
+go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out -o coverage.html
+
+# Run handler tests only
+go test -v ./internal/handlers/
+
+# Run route RBAC tests only
+go test -v ./internal/routes/
 
 # Run specific test
 go test -v -run TestGetAllCertifications_Success ./internal/handlers/
@@ -24,19 +30,13 @@ go test -v -run TestGetAllCertifications_Success ./internal/handlers/
 # Run all Certification tests
 go test -v -run Certification ./internal/handlers/
 
-# Run all Skill tests
-go test -v -run Skill ./internal/handlers/
-
-# Run all Work Experience tests
-go test -v -run WorkExperience ./internal/handlers/
-
-# Run all Miniature tests
-go test -v -run Miniature ./internal/handlers/
+# Run all permission tests
+go test -v -run Permission ./internal/routes/
 ```
 
 ## Test Files
 
-**`handler_test.go`** - 83 tests
+### `internal/handlers/handler_test.go` - 81 tests
 
 | Category | Tests | Coverage |
 | -------- | ----- | -------- |
@@ -51,6 +51,23 @@ go test -v -run Miniature ./internal/handlers/
 | Context Propagation | 1 | Verifies context with sentinel value |
 | ID Validation | 1 | Table-driven invalid ID format tests |
 | Constructor | 1 | Handler initialization |
+
+### `internal/routes/routes_test.go` - 133 tests
+
+| Category | Tests | Coverage |
+| -------- | ----- | -------- |
+| Portfolio Routes Forbidden | 31 | All portfolio routes return 403 without permission |
+| Portfolio Routes Allowed | 31 | All portfolio routes accessible with correct permission |
+| Miniatures Routes Forbidden | 19 | All miniature routes return 403 without permission |
+| Miniatures Routes Allowed | 19 | All miniature routes accessible with correct permission |
+| Files Routes Forbidden | 1 | DELETE /files/:id returns 403 without permission |
+| Files Routes Allowed | 1 | DELETE /files/:id accessible with delete permission |
+| Permission Hierarchy | 10 | delete > edit > read > none hierarchy |
+| Cross-Resource Permissions | 1 | Resource isolation (profile:delete ≠ experience:read) |
+| Multiple Resource Permissions | 8 | Mixed permission levels across resources |
+| No Scopes | 1 | Returns 401 Unauthorized when scopes missing |
+| Invalid Scopes Format | 1 | Returns 500 when scopes is wrong type |
+| Repository Error Propagation | 1 | Handler errors pass through middleware |
 
 ## Key Testing Patterns
 
@@ -83,6 +100,22 @@ project := createTestMiniatureProject()
 technique := createTestMiniatureTechnique()
 ```
 
+**RBAC Testing**: Scope injection simulates JWT claims
+
+```go
+// Inject scopes into Gin context (simulates ValidateToken middleware)
+func injectScopes(scopes map[string]string) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        c.Set("scopes", scopes)
+        c.Next()
+    }
+}
+
+// Test with specific permissions
+scopes := map[string]string{common.ResourceProfile: common.LevelRead}
+router := setupRouterWithScopes(t, scopes)
+```
+
 ## Test Categories
 
 ### Success Cases
@@ -97,6 +130,13 @@ technique := createTestMiniatureTechnique()
 - Not found errors (404)
 - Invalid ID format (400)
 - Validation errors (400)
+
+### RBAC Cases (routes_test.go)
+
+- Permission denied (403) - missing or insufficient permission
+- Permission granted - exact match or higher level
+- Unauthorized (401) - no scopes in context
+- Internal error (500) - invalid scopes format
 
 ## Contributing Tests
 
