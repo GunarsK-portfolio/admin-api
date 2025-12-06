@@ -696,6 +696,8 @@ func TestPortfolioRoutes_Allowed_WithPermission(t *testing.T) {
 			router := setupRouterWithScopes(t, scopes)
 			w := performRequest(t, router, route.method, route.path)
 
+			// We only verify authorization passes (not 403/401).
+			// Handler may return 400/404/500 due to missing body or mock defaults.
 			if w.Code == http.StatusForbidden {
 				t.Errorf("got 403 Forbidden with permission %s:%s", route.resource, route.level)
 			}
@@ -730,6 +732,8 @@ func TestMiniaturesRoutes_Allowed_WithPermission(t *testing.T) {
 			router := setupRouterWithScopes(t, scopes)
 			w := performRequest(t, router, route.method, route.path)
 
+			// We only verify authorization passes (not 403/401).
+			// Handler may return 400/404/500 due to missing body or mock defaults.
 			if w.Code == http.StatusForbidden {
 				t.Errorf("got 403 Forbidden with permission %s:%s", route.resource, route.level)
 			}
@@ -761,6 +765,8 @@ func TestFilesRoutes_Allowed_WithPermission(t *testing.T) {
 			router := setupRouterWithScopes(t, scopes)
 			w := performRequest(t, router, route.method, route.path)
 
+			// We only verify authorization passes (not 403/401).
+			// Handler may return 400/404/500 due to missing body or mock defaults.
 			if w.Code == http.StatusForbidden {
 				t.Errorf("got 403 Forbidden with permission %s:%s", route.resource, route.level)
 			}
