@@ -11,7 +11,7 @@ RUN go mod tidy && go mod download
 RUN go build -o admin-api ./cmd/api
 
 # Production stage
-FROM alpine:3.23.3
+FROM alpine:3.23.4
 
 # Security update - CACHE_BUST is set by CI to force fresh apk upgrade
 ARG CACHE_BUST
