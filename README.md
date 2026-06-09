@@ -21,7 +21,7 @@ RESTful API for managing portfolio content with authentication.
 
 ## Tech Stack
 
-- **Language**: Go 1.25.3
+- **Language**: Go 1.26.4
 - **Framework**: Gin
 - **Database**: PostgreSQL (GORM)
 - **Common**: portfolio-common library (shared database utilities, auth middleware)
@@ -30,7 +30,7 @@ RESTful API for managing portfolio content with authentication.
 
 ## Prerequisites
 
-- Go 1.25+
+- Go 1.26+
 - Node.js 22+ and npm 11+
 - PostgreSQL (or use Docker Compose)
 - auth-service running
